@@ -11,15 +11,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-//Injection function here:
-function injectDataIntoWebsite(data) {
-  // Use JavaScript to interact with the website's DOM and inject data as needed
-  // For example, fill out form fields, click buttons, etc.
-  // Example:
-  const inputField = document.getElementById("fileinput");
-  if (inputField) {
-    inputField.value = data.someValue;
-    return true;
-  }
-  return false;
-}
+// Below is the first steps to start the proposal:
+const startProp = document.getElementById("nextgenproposal~popup-intro.0x1");
+// Below is a click event listener for the button:
+startProp.addEventListener("click", () => {
+  // Click button to lightning start prop and open the modal:
+  startProp.textContent = "Clicked!";
+
+  // Disable the button:
+  startProp.disabled = true;
+
+  // Change the buttons background color:
+  startProp.style.backgroundColor = "red";
+
+  // Other manipulations can be added within the startProp function....
+});
