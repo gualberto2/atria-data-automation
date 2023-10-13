@@ -7,14 +7,12 @@
     "default_popup": "index.html"
   },
   "permissions": ["activeTab", "storage"],
-  "content_scripts": [
-    { "matches": ["https://my.advisorlogin.com/*"], "js": ["inject.js"] }
-  ],
+  "content_scripts": [{ "matches": ["<all_urls>"], "js": ["inject.js"] }],
   "background": {
     "service_worker": "service_worker.js",
     "type": "module"
   },
   "web_accessible_resources": [
-    { "resources": ["inject.js"], "matches": ["https://my.advisorlogin.com/*"] }
+    { "resources": ["inject.js"], "matches": ["<all_urls>"] }
   ]
 }
