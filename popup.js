@@ -17,22 +17,22 @@ document
 
       reader.readAsBinaryString(file);
     }
-    document.getElementById("start").addEventListener("click", () => {
-      // Below is the code that sends a message to start the injection process.
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        // Send message to "service_worker.js" to start the injection process
-        chrome.tabs.sendMessage(
-          activeTab.id,
-          { action: "startInjection" },
-          (response) => {
-            if (response && response.status === "success") {
-              console.log("Data transfer successful");
-            } else {
-              console.error("Data injection failed. See error.");
-            }
-          }
-        );
-      });
-    });
   });
+document.getElementById("start").addEventListener("click", () => {
+  // Below is the code that sends a message to start the injection process.
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs[0];
+    // Send message to "service_worker.js" to start the injection process
+    chrome.tabs.sendMessage(
+      activeTab.id,
+      { action: "startInjection" },
+      (response) => {
+        if (response && response.status === "success") {
+          console.log("Data transfer successful");
+        } else {
+          console.error("Data injection failed. See error.");
+        }
+      }
+    );
+  });
+});
