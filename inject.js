@@ -14,9 +14,8 @@ function startInjectionProcess() {
 
 // Below is a listener for a message from the background script...
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "injectData") {
+  if (message.action === "startInjection") {
     const injectionResult = startInjectionProcess(); // Call the injection logic from above once the message is received
-
     if (injectionResult) {
       sendResponse({ status: "success" });
     } else {
