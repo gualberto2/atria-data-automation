@@ -13,14 +13,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.status === "complete" && isTabOfInterest(tab)) {
     // The tab is one we're interested in and it's fully loaded, so inject the content script into it to execute step two...
-    chrome.tabs.executeScript(
-      tabId,
-      { file: "newContentScript.js" },
-      function () {
-        // Optional callback to handle after the script is injected
-        console.log("Script injected and executed");
-      }
-    );
+    chrome.tabs.executeScript(tabId, { file: "newTabScript.js" }, function () {
+      // Optional callback to handle after the script is injected
+      console.log("Script injected and executed");
+    });
   }
 });
 
