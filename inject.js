@@ -12,7 +12,7 @@ function startInjectionProcess() {
   return false;
 }
 
-// Below is a listener for a message from the background script...
+// Below is a listener for a message from the popup.js file sender...
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startInjection") {
     const injectionResult = startInjectionProcess(); // Call the injection logic from above once the message is received
