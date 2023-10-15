@@ -1,3 +1,44 @@
+// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+//   if (
+//     changeInfo.status === "complete" &&
+//     tab.url.includes("yourSpecificWebsite.com")
+//   ) {
+//     // Inject your content script
+//     chrome.tabs.executeScript(
+//       tabId,
+//       { file: "newContentScript.js" },
+//       function () {
+//         // After the script is injected, you can send a message to it
+//         chrome.tabs.sendMessage(tabId, {
+//           action: "injectData",
+//           data: {
+//             /* your data here */
+//           },
+//         });
+//       }
+//     );
+//   }
+// });
+
+// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+//   if (changeInfo.status === "complete" && isTabOfInterest(tab)) {
+//     // The tab is one we're interested in and it's fully loaded, so inject the content script into it to execute step two...
+//     chrome.tabs.executeScript(tabId, { file: "newTabScript.js" }, function () {
+//       // Optional callback to handle after the script is injected
+//       console.log("Script injected and executed");
+//     });
+//   }
+// });
+
+// function isTabOfInterest(tab) {
+//   // Check the tab's properties, like URL, to see if it's the tab you're interested in
+//   // Return true if it is, false otherwise
+//   return tab.url.includes(
+//     "https://my.advisorlogin.com/secure/proposalapp/#/household"
+//   ); // Simplified check, you might need more complex logic
+// }
+
+// Below is the content script that connected the inject.js to the popup.js....
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "startInjection") {
     // Perform any necessary background tasks
@@ -9,21 +50,3 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     });
   }
 });
-
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  if (changeInfo.status === "complete" && isTabOfInterest(tab)) {
-    // The tab is one we're interested in and it's fully loaded, so inject the content script into it to execute step two...
-    chrome.tabs.executeScript(tabId, { file: "newTabScript.js" }, function () {
-      // Optional callback to handle after the script is injected
-      console.log("Script injected and executed");
-    });
-  }
-});
-
-function isTabOfInterest(tab) {
-  // Check the tab's properties, like URL, to see if it's the tab you're interested in
-  // Return true if it is, false otherwise
-  return tab.url.includes(
-    "https://my.advisorlogin.com/secure/proposalapp/#/household"
-  ); // Simplified check, you might need more complex logic
-}
