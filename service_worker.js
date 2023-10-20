@@ -1,52 +1,36 @@
-// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-//   if (
-//     changeInfo.status === "complete" &&
-//     tab.url.includes("yourSpecificWebsite.com")
-//   ) {
-//     // Inject your content script
-//     chrome.tabs.executeScript(
-//       tabId,
-//       { file: "newContentScript.js" },
-//       function () {
-//         // After the script is injected, you can send a message to it
-//         chrome.tabs.sendMessage(tabId, {
-//           action: "injectData",
-//           data: {
-//             /* your data here */
-//           },
-//         });
-//       }
-//     );
-//   }
-// });
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  // Below I am defining all the url paths in the SPA for ENVESTNET form....
+  const targetUrls = [
+    "https://my.advisorlogin.com/secure/proposalapp/#/household",
+    "https://my.advisorlogin.com/secure/proposalapp/#/riskAndObjective",
+    "https://my.advisorlogin.com/secure/proposalapp/#/strategies",
+    "https://my.advisorlogin.com/secure/proposalapp/#/accountSetup",
+    "https://my.advisorlogin.com/secure/proposalapp/#/fees",
+    "https://my.advisorlogin.com/secure/proposalapp/#/overview",
+  ];
 
-// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-//   if (changeInfo.status === "complete" && isTabOfInterest(tab)) {
-//     // The tab is one we're interested in and it's fully loaded, so inject the content script into it to execute step two...
-//     chrome.tabs.executeScript(tabId, { file: "newTabScript.js" }, function () {
-//       // Optional callback to handle after the script is injected
-//       console.log("Script injected and executed");
-//     });
-//   }
-// });
-
-// function isTabOfInterest(tab) {
-//   // Check the tab's properties, like URL, to see if it's the tab you're interested in
-//   // Return true if it is, false otherwise
-//   return tab.url.includes(
-//     "https://my.advisorlogin.com/secure/proposalapp/#/household"
-//   ); // Simplified check, you might need more complex logic
-// }
-
-// Below is the content script that connected the inject.js to the popup.js....
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.action === "startInjection") {
-    // Perform any necessary background tasks
-    // You can also forward the message to other scripts if needed.
-    // For example, you can forward it to your content script:
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const activeTab = tabs[0];
-      chrome.tabs.sendMessage(activeTab.id, message, sendResponse);
-    });
+  // Check if any of the URLs is in the updated tab's URL
+  const isTargetUrl = tab.url
+    ? targetUrls.some((part) => tab.url.includes(part))
+    : false;
+  if (changeInfo.status === "complete" && isTargetUrl) {
+    // Inject the new content script to finish the automation process?
+    chrome.tabs.executeScript(
+      tabId, // target the specific tab
+      { file: "newTabScript.js" },
+      function () {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError.message);
+          return;
+        }
+        // Here, the script has been injected, and you can send a message if needed.
+        chrome.tabs.sendMessage(tabId, {
+          action: "automateData",
+          data: {
+            // Data goes here. This could be anything needed to pass to the content script.
+          },
+        });
+      }
+    );
   }
 });
