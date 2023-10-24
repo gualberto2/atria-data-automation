@@ -14,22 +14,27 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     ? targetUrls.some((part) => tab.url.includes(part))
     : false;
   if (changeInfo.status === "complete" && isTargetUrl) {
-    // Inject the new content script to finish the automation process?
-    chrome.tabs.executeScript(
-      tabId, // target the specific tab
-      { file: "newTabScript.js" },
-      function () {
-        if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError.message);
-          return;
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: tabId },
+        files: ["newTabScript.js"],
+      },
+      (injectionResults) => {
+        for (const frameResult of injectionResults) {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
+            return;
+          }
+          console.log("script injected test");
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tabId, {
+              action: "automateData",
+              data: {
+                //data goes here for next steps in filling out the form...
+              },
+            });
+          }, 2000); // A 2 second delay
         }
-        // Here, the script has been injected, and you can send a message if needed.
-        chrome.tabs.sendMessage(tabId, {
-          action: "automateData",
-          data: {
-            // Data goes here. This could be anything needed to pass to the content script.
-          },
-        });
       }
     );
   }

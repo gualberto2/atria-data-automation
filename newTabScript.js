@@ -1,4 +1,4 @@
-console.log("script injected bitch!");
+console.log("test script");
 
 function clickSpan() {
   let success = false; // flag to indicate if click was successful
@@ -20,6 +20,7 @@ function clickSpan() {
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  console.log("received a message", message);
   if (message.action === "automateData") {
     // Ensure the DOM content is loaded before trying to click the span
     if (document.readyState === "loading") {
