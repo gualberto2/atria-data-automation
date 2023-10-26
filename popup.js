@@ -1,3 +1,5 @@
+// Below we are reading and parsing the excel file into importable data
+let excelData = null;
 document
   .getElementById("fileinput")
   .addEventListener("change", function (event) {
@@ -18,6 +20,9 @@ document
       reader.readAsBinaryString(file);
     }
   });
+
+// Below is the logic to start the automation injection process by opening a new window. As well as sending the
+// - parsed data to the newTabScript, via the service_worker.js.....
 document.getElementById("start").addEventListener("click", () => {
   // Below is the code that sends a message to start the injection process.
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -25,7 +30,7 @@ document.getElementById("start").addEventListener("click", () => {
     // Send message to "service_worker.js" to start the injection process
     chrome.tabs.sendMessage(
       activeTab.id,
-      { action: "startInjection" },
+      { action: "startInjection", data: excelData },
       (response) => {
         if (response && response.status === "success") {
           console.log("Data transfer successful");
