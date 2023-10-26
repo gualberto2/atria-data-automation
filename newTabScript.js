@@ -16,7 +16,7 @@ function clickSpan() {
       success = true;
     }
   });
-  return success; // return the status
+  return success; // Return the status
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
