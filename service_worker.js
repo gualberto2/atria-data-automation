@@ -1,11 +1,3 @@
-let globalExcelData = null;
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.action === "sendExcelData") {
-    globalExcelData = message.data; // Received data stored here...
-    sendResponse({ status: "data received" });
-  }
-});
-
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   // Below I am defining all the url paths in the SPA for ENVESTNET form....
   const targetUrls = [

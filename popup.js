@@ -1,5 +1,4 @@
 // Below we are reading and parsing the excel file into importable data
-let excelData = null;
 document
   .getElementById("fileinput")
   .addEventListener("change", function (event) {
