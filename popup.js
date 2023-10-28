@@ -13,8 +13,14 @@ document
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const excelData = XLSX.utils.sheet_to_json(worksheet, { raw: true });
+        excelData = XLSX.utils.sheet_to_json(worksheet, { raw: true });
         console.log(excelData);
+        chrome.runtime.sendMessage(
+          { action: "sendExcelData", data: excelData },
+          function (response) {
+            console.log("Response:", response);
+          }
+        );
       };
 
       reader.readAsBinaryString(file);
@@ -30,7 +36,7 @@ document.getElementById("start").addEventListener("click", () => {
     // Send message to "service_worker.js" to start the injection process
     chrome.tabs.sendMessage(
       activeTab.id,
-      { action: "startInjection", data: excelData },
+      { action: "startInjection" },
       (response) => {
         if (response && response.status === "success") {
           console.log("Data transfer successful");

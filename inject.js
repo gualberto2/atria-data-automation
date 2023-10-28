@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startInjection") {
     const injectionResult = startInjectionProcess(); // Call the injection logic from above once the message is received
     if (injectionResult) {
-      sendResponse({ status: "success" });
+      sendResponse({ status: "success", data: excelData });
     } else {
       sendResponse({ status: "error" });
     }
