@@ -14,12 +14,10 @@ document
         const worksheet = workbook.Sheets[sheetName];
         excelData = XLSX.utils.sheet_to_json(worksheet, { raw: true });
         console.log(excelData);
-        chrome.runtime.sendMessage(
-          { action: "sendExcelData", data: excelData },
-          function (response) {
-            console.log("Response:", response);
-          }
-        );
+        // Storing the excelData below with chrome storage api
+        chrome.storage.local.set({ excelData: excelData }, function () {
+          console.log("Excel data stored in chrome storage");
+        });
       };
 
       reader.readAsBinaryString(file);
