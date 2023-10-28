@@ -7,18 +7,44 @@
     <title>Atria Wealth</title>
   </head>
   <body>
-    <h1>Data Transfer Atria Wealth</h1>
-    <p>To use make sure you set up the following:</p>
-    <ul>
-      <li>
-        Make sure you have a properly formatted excel sheet (ask Tim he'll email
-        template)
-      </li>
-      <li>Open the myadvisor webpage and then press the start button</li>
-    </ul>
-    <input type="file" name="excel" id="fileinput" />
+    <section>
+      <div>
+        <div>
+          <h1>Atria Wealth MGMT</h1>
+          <h2>Auto Fill Script</h2>
+        </div>
+        <div>
+          <p>Instructions</p>
+          <p>Upload an approved Atria Formatted Advisor excel sheet</p>
+          <p>Run the script</p>
+          <p>Read the post-script log for errors</p>
+          <p>Report errors, make corrections and move onto the next Advisor</p>
+        </div>
 
-    <button id="start">Start here (after uploading file)</button>
+        <p>
+          Submit error reports
+          <span> here </span>
+          .
+        </p>
+        <p>
+          Have a question? Visit
+          <span> here </span>
+          .
+        </p>
+
+        <div>
+          <div>
+            <input type="file" id="fileinput" accept=".xlsx, .csv" />
+          </div>
+          <div>
+            <div>
+              <button id="start">Start population</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <script src="./xlsx.full.min.js"></script>
     <script src="popup.js"></script>
   </body>
