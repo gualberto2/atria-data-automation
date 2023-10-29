@@ -1,4 +1,5 @@
 console.log("test script");
+// utility functions defined here below:
 
 function clickSpan() {
   let success = false; // flag to indicate if click was successful
@@ -18,6 +19,19 @@ function clickSpan() {
   });
   return success; // Return the status
 }
+
+function findElementByAriaLabel(label) {
+  return document.querySelector(`[aria-label="${label}"]`);
+}
+
+function setInputValueByAriaLabel(label, value) {
+  const element = findElementByAriaLabel(label);
+  if (element) {
+    element.value = value;
+  }
+}
+
+// Utility functions already defined above...
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "automateData") {
