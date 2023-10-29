@@ -52,3 +52,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     return true;
   }
 });
+
+function processExcelData(data) {
+  // Assuming data is an array of objects with keys corresponding to aria labels
+  data.forEach((item) => {
+    for (const key in item) {
+      setInputValueByAriaLabel(key, item[key]); // or setTextByAriaLabel, as appropriate
+    }
+  });
+  // ... any additional processing ...
+}
