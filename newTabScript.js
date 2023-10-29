@@ -20,8 +20,10 @@ function clickSpan() {
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  console.log("received a message", message);
+  console.log("received a message", JSON.stringify(message.data, null, 2));
   if (message.action === "automateData") {
+    console.log("Received Excel Data:", message.data);
+    // Further processing can be done here
     // Ensure the DOM content is loaded before trying to click the span
     if (document.readyState === "loading") {
       // When loading has not finished yet
