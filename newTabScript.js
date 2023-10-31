@@ -1,8 +1,8 @@
 console.log("test script");
-//Utility functions defined here below:
+// Utility functions defined here below:
 
 function clickSpan() {
-  let success = false; // flag to indicate if click was successful
+  let success = false; // Flag to indicate if click was successful
   let spans = document.querySelectorAll("span");
   spans.forEach((span) => {
     if (span.textContent.includes("Create a new household")) {
@@ -21,8 +21,13 @@ function clickSpan() {
 }
 // Below is the function to click the add button span element in order to submit name data to the database...
 function addNameClick() {
-  let success = false; // flag to indicate if click was successful
-  let spans = document.querySelectorAll("span");
+  let success = false; // Flag to indicate if click was successful.
+  let container = document.querySelector(".modal-draggable-handle");
+  if (!container) {
+    console.error("Container not found");
+    return false;
+  }
+  let spans = container.querySelectorAll("span");
   spans.forEach((span) => {
     if (span.textContent.includes("Add")) {
       // Create a new mouse event
@@ -38,6 +43,7 @@ function addNameClick() {
   });
   return success; // Return the status
 }
+
 function setInputValueByAriaLabel(label, value) {
   const element = findElementByAriaLabel(label);
   if (element) {
@@ -71,7 +77,7 @@ function setupMutationObserver(data) {
       }
     }
   };
-  //Create an instance of the observer with the callback function
+  // Create an instance of the observer with the callback function
   const observer = new MutationObserver(callback);
   // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
@@ -91,7 +97,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         sendResponse({ status: openName ? "success" : "error" });
       });
     } else {
-      //DOMContentLoaded already has fired
+      // DOMContentLoaded already has fired
       const openName = clickSpan(); // Calling the span clicker here...
       setupMutationObserver(message.data);
       sendResponse({ status: openName ? "success" : "error" });
