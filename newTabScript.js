@@ -82,14 +82,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 function processExcelData(data) {
   console.log("Processing data", data);
-  // Add checks for data structure here
-  if (typeof data === "object" && data !== null) {
+  // Check if data is an array and has the required index
+  if (Array.isArray(data) && data.length > 29) {
+    const formData = data[29]; // For example, using the 30th item in the array
     const clientTitle = data.CLIENT_TITLE || "Default Title"; // Fallback value
-    const firstName = data.FIRST_NAME || "Default Name"; // Fallback as well
+    const firstName = data.FIRST_NAME || "Default Name"; // Fallback value for name
     setInputValueByAriaLabel("Enter household name", clientTitle);
     setInputValueByAriaLabel("First name", firstName);
-    // Additional processing...
   } else {
-    console.error("Invalid data format");
+    console.error("Invalid data format or index out of bounds");
   }
+  // Additional processing...
 }
