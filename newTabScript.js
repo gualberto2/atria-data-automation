@@ -1,4 +1,3 @@
-
 // NEWTABSCRIPT.JS **
 // Step 4: running the scripts for the new tab **
 
@@ -6,7 +5,6 @@
 // Just to confirm its running n shit
 console.log("New tab script running!");
 // utility functions defined here below:
-
 
 //Clicks a certain button that says "Create household"
 function clickSpan() {
@@ -32,7 +30,6 @@ function clickSpan() {
   });
   return success; // Return the status
 }
-
 
 // Helper function to fetch an element by its aria-label attribute.
 function findElementByAriaLabel(label) {
@@ -86,7 +83,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     // Ensure webpage content (DOM) is fully loaded before taking action.
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
-
         const openName = clickSpan(); // call the autoclicker here
         setupMutationObserver(message.data);
         sendResponse({ status: openName ? "success" : "error" });
@@ -96,7 +92,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       const openName = clickSpan(); // Calling the span clicker here...
       setupMutationObserver(message.data);
       sendResponse({ status: openName ? "success" : "error" });
-
     }
     return true;
   }
@@ -104,7 +99,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 // Process the provided Excel data to fill input fields.
 function processExcelData(data) {
-// GUALBERTO BRANCH
+  // GUALBERTO BRANCH
   // Assuming data is an array of objects with keys corresponding to aria labels
   data.forEach((item) => {
     for (const key in item) {
@@ -113,7 +108,7 @@ function processExcelData(data) {
   });
   //......
 
-//   MAIN BRANCH
+  //   MAIN BRANCH
   console.log("Processing data", data);
   // Add checks for data structure here
   if (typeof data === "object" && data !== null) {
@@ -125,5 +120,4 @@ function processExcelData(data) {
   } else {
     console.error("Invalid data format");
   }
-
 }
