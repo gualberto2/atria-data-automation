@@ -15,6 +15,8 @@ document
       // Declaration for function that async read contents of file given
       const reader = new FileReader();
 
+      let excelData;
+
       reader.onload = function (e) {
         // Shortened declaration
         const data = e.target.result;

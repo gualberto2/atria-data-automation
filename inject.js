@@ -2,6 +2,33 @@
 // This is ran at the my.advisor portal **
 // Step 2 in the automation process **
 
+let excelDataFromStorage = null;
+
+chrome.storage.local.get("excelData", function (result) {
+  excelDataFromStorage = result.excelData;
+  if (!excelDataFromStorage) {
+    console.error("excelData not found in storage");
+  }
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "startInjection") {
+    if (!excelDataFromStorage) {
+      sendResponse({
+        status: "error",
+        reason: "No excel data found in storage",
+      });
+      return;
+    }
+    const injectionResult = startProposal();
+    if (injectionResult) {
+      sendResponse({ status: "success", data: excelDataFromStorage });
+    } else {
+      sendResponse({ status: "error" });
+    }
+  }
+});
+
 // The first step in injection process
 function startProposal() {
   // Declaration for the start proposal button on my.advisor portal (id for button is static)
@@ -21,16 +48,6 @@ function startProposal() {
 }
 
 // Below is a listener for a message from the popup.js file sender...
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "startInjection") {
-    const injectionResult = startInjectionProcess(); // Call the injection logic from above once the message is received
-    if (injectionResult) {
-      sendResponse({ status: "success", data: excelData });
-    } else {
-      sendResponse({ status: "error" });
-    }
-  }
-});
 
 // Below is function for autofilling for example,
 // function example() {
