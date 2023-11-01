@@ -1,6 +1,8 @@
 // BACKGROUND.JS
 // This is step 3 - after proposal button is clicked on the my.advisor page
 
+const injectedTabs = new Set();
+
 // This part of the script monitors any navigation to certain URLS **
 // As shown in the declaration for "targetURLS = [...]" **
 // If matching URL is found, this will inject another js file (newTabScript.js) **
@@ -24,6 +26,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   // Reacting to Complete Page Load for Target URL //
   // Check for updated tab to see if it is done loading ("status === 'complete'")
   if (changeInfo.status === "complete" && isTargetUrl) {
+    // Check if the script has already been injected into this tab
+    if (injectedTabs.has(tabId)) {
+      return; // If already injected, exit early
+    }
     // Stored and parsed excel data will be fetched
     chrome.storage.local.get("excelData", function (data) {
       // Error check
@@ -42,6 +48,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
           files: ["newTabScript.js"],
         },
         (injectionResults) => {
+          injectedTabs.add(tabId); // Add tabId to the set after successful injection
           // Iterating over Injection Results:
           for (const frameResult of injectionResults) {
             // Error check
@@ -56,6 +63,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
             // Sending Message After Delay:
             setTimeout(() => {
+              console.log("Sending automateData message to tab");
               chrome.tabs.sendMessage(tabId, {
                 action: "automateData",
                 data: excelData, // Passing the excelData here to newTabScript.js
@@ -93,4 +101,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // This is needed for async response
   }
+});
+
+chrome.tabs.onRemoved.addListener(function (tabId) {
+  injectedTabs.delete(tabId);
 });
