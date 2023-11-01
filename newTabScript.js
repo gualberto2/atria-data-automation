@@ -22,14 +22,17 @@ function clickSpan() {
 // Below is the function to click the add button span element in order to submit name data to the database...
 function addNameClick() {
   let success = false; // Flag to indicate if click was successful.
-  let container = document.querySelector(".modal-draggable-handle");
+  let container = document.querySelector(".MuiDialogContent-root");
   if (!container) {
     console.error("Container not found");
     return false;
   }
+  console.log("Modal container found, searching for spans");
   let spans = container.querySelectorAll("span");
   spans.forEach((span) => {
+    console.log("Checking span:", span);
     if (span.textContent.includes("Add")) {
+      console.log("Add span found, attempting click...");
       // Create a new mouse event
       let event = new MouseEvent("click", {
         view: window,
