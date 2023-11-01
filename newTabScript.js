@@ -1,11 +1,13 @@
 // NEWTABSCRIPT.JS **
 // Step 4: running the scripts for the new tab **
 
-// _DEV USE ONLY
-// Just to confirm its running n shit
-console.log("New tab script running!");
 // utility functions defined here below:
+// let hasProcessedModal = false;
 
+if (window.hasInjectedScript) {
+  throw new Error("Script already injected");
+}
+window.hasInjectedScript = true;
 //Clicks a certain button that says "Create household"
 function clickSpan() {
   let success = false; // flag to indicate if click was successful
@@ -31,16 +33,14 @@ function clickSpan() {
   return success; // Return the status
 }
 
-// Helper function to fetch an element by its aria-label attribute.
-function findElementByAriaLabel(label) {
-  return document.querySelector(`[aria-label="${label}"]`);
-}
+// Below is the function to click the add button span element in order to submit name data to the database...
 
-// Set input value based on its aria-label attribute.
 function setInputValueByAriaLabel(label, value) {
   const element = findElementByAriaLabel(label);
   if (element) {
     element.value = value;
+    // Manually trigger a change event
+    element.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }
 
@@ -48,37 +48,125 @@ function findElementByAriaLabel(label) {
   return document.querySelector(`[aria-label="${label}"]`);
 }
 
-function setupMutationObserver(data) {
-  // Select the node that will be observed for mutations
-  const targetNode = document.body; //Assuming that we want to observe the entire body for changes....
-  // Options for the observer (which mutations to observe)
+function setupMutationObserverForModal(data) {
+  const targetNode = document.body;
   const config = { attributes: false, childList: true, subTree: true };
-  // Callback function to execute when mutations are observed
   const callback = function (mutationsList, observer) {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-        // Check if the added node is the modal or contains the modal
-        // You might need to adjust the condition based on your modal's characteristics
         if (mutation.target.querySelector(".modal-draggable-handle")) {
-          console.log("Modal detected!"); // Confirming modal detection
-          // Replace '.modal-selector' with an actual selector for your modal
+          console.log("MODAL DETECTED");
           processExcelData(data);
-          observer.disconnect(); // Stop observing after successful data injection..
+
+          // Disconnect the current observer since we found the modal
+          observer.disconnect();
+
+          // Setup another observer to detect the removal of the modal
+          setupObserverForModalRemoval();
         }
       }
     }
   };
-  //Create an instance of the observer with the callback function
+
   const observer = new MutationObserver(callback);
-  // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
 }
-// Utility functions defined above...
+
+function setupObserverForModalRemoval() {
+  const targetNode = document.body;
+  const config = { attributes: false, childList: true, subTree: true };
+  const callback = function (mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList" && mutation.removedNodes.length > 0) {
+        const modalRemoved = Array.from(mutation.removedNodes).some(
+          (node) =>
+            node.querySelector && node.querySelector(".modal-draggable-handle")
+        );
+        if (modalRemoved) {
+          console.log("MODAL REMOVED");
+          clickSaveAndContinue();
+
+          // Disconnect the observer since we detected the removal of the modal
+          observer.disconnect();
+        }
+      }
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+}
+
+function clickSaveAndContinue() {
+  // Look for the button with text "Save and continue"
+  let buttons = document.querySelectorAll("button");
+  for (let button of buttons) {
+    if (button.textContent.includes("Save and continue")) {
+      console.log(`BUTTON FOUND WITH STRING "SAVE AND CONTINUE"`, button);
+
+      // Introduce a 2-second delay (2000 milliseconds) before clicking the button
+      setTimeout(() => {
+        // Create a new mouse event
+        let event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        // Dispatch the event on the button
+        button.dispatchEvent(event);
+        clickRiskToleranceButtonAfterDelay();
+      }, 2000);
+
+      return;
+    }
+  }
+  console.log("Save and continue button not found");
+}
+
+function clickRiskToleranceButtonAfterDelay() {
+  setTimeout(() => {
+    const button = document.querySelector(
+      'button[aria-label="I already know my client\'s risk tolerance"]'
+    );
+    if (button) {
+      button.click();
+      console.log("Clicked the risk tolerance button.");
+    } else {
+      console.error("Risk tolerance button not found.");
+    }
+  }, 5000); // Delay of 5 seconds (5000 milliseconds)
+}
+
+function addNameClick() {
+  let success = false; // Flag to indicate if click was successful.
+  let container = document.querySelector(".MuiDialogContent-root");
+  if (!container) {
+    console.log("Container not found");
+    return false;
+  }
+  console.log("MODAL FOUND: Searching <SPANS> 🔎");
+  let spans = container.querySelectorAll("span");
+  spans.forEach((span) => {
+    if (span.textContent.includes("Add")) {
+      console.log(`SPAN FOUND WITH STRING "ADD"`, span);
+      // Create a new mouse event
+      let event = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      // Dispatch the event on the target element...
+      span.dispatchEvent(event);
+      success = true;
+    }
+  });
+  return success; // Return the status
+}
 
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "automateData") {
-    console.log("Received Excel Data:", message.data);
+    console.log("Excel data retrieved:", message.data);
 
     // Ensure webpage content (DOM) is fully loaded before taking action.
     if (document.readyState === "loading") {
@@ -97,27 +185,26 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 });
 
-// Process the provided Excel data to fill input fields.
 function processExcelData(data) {
-  // GUALBERTO BRANCH
-  // Assuming data is an array of objects with keys corresponding to aria labels
-  data.forEach((item) => {
-    for (const key in item) {
-      setInputValueByAriaLabel(key, item[key]); // or setTextByAriaLabel, as appropriate
-    }
-  });
-  //......
-
-  //   MAIN BRANCH
-  console.log("Processing data", data);
-  // Add checks for data structure here
-  if (typeof data === "object" && data !== null) {
-    const clientTitle = data.CLIENT_TITLE || "Default Title"; // Fallback value
-    const firstName = data.FIRST_NAME || "Default Name"; // Fallback as well
+  console.log("Processing data: ", data);
+  // Check if data is an array and has the required index
+  if (Array.isArray(data) && data.length > 29) {
+    const formData = data[29]; // For example, using the 30th item in the array
+    const clientTitle = formData.CLIENT_TITLE || "Default Title"; // Fallback value
+    const firstName = formData.FIRST_NAME || "Default FName"; // Fallback value for name
+    const lastName = formData.LAST_NAME || "Default LNAME"; //Fallback for last name
     setInputValueByAriaLabel("Enter household name", clientTitle);
     setInputValueByAriaLabel("First name", firstName);
-    // Additional processing...
+    setInputValueByAriaLabel("Last name", lastName);
   } else {
-    console.error("Invalid data format");
+    console.error("Invalid data format or index out of bounds");
   }
+  // Additional processing...
+  setTimeout(() => {
+    const addClicked = addNameClick();
+    console.log("Add button clicked? :", addClicked);
+    if (addClicked) {
+      setupObserverForModalRemoval(); // Set up the observer only if "Add" was clicked.
+    }
+  }, 2000); // Adjust delay too long is noticable to short will mess up flow...
 }
