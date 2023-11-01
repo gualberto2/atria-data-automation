@@ -7,7 +7,7 @@ let excelDataFromStorage = null;
 chrome.storage.local.get("excelData", function (result) {
   excelDataFromStorage = result.excelData;
   if (!excelDataFromStorage) {
-    console.error("excelData not found in storage");
+    console.log("excelData not found in storage");
   }
 });
 
