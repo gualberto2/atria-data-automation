@@ -64,7 +64,7 @@ function setupMutationObserver(data) {
   // Select the node that will be observed for mutations
   const targetNode = document.body; //Assuming that we want to observe the entire body for changes....
   // Options for the observer (which mutations to observe)
-  const config = { attributes: false, childList: true, subTree: true };
+  const config = { attributes: false, childList: true, subtree: true };
   // Callback function to execute when mutations are observed
   const callback = function (mutationsList, observer) {
     for (const mutation of mutationsList) {
@@ -73,7 +73,6 @@ function setupMutationObserver(data) {
         // You might need to adjust the condition based on your modal's characteristics
         if (mutation.target.querySelector(".modal-draggable-handle")) {
           console.log("Modal detected!"); // Confirming modal detection
-          // Replace '.modal-selector' with an actual selector for your modal
           processExcelData(data);
           observer.disconnect(); // Stop observing after successful data injection..
         }
@@ -85,6 +84,38 @@ function setupMutationObserver(data) {
   // Start observing the target node for configured mutations
   observer.observe(targetNode, config);
 }
+// Below is function to finalize everything in the household section
+function clickSaveAndContinue() {
+  // Create an instance of the observer...
+  const observer = new MutationObserver((mutations, obs) => {
+    mutations.forEach((mutation) => {
+      // Check if the `save and continue` button is avaliable and visible...
+      if (
+        mutation.target.querySelector("span") &&
+        mutation.target
+          .querySelector("span")
+          .textContent.includes("Save and continue")
+      ) {
+        let saveButton = mutation.target.querySelector("span");
+        let event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        saveButton.dispatchEvent(event);
+        console.log("Save and continue button clicked!");
+        obs.disconnect(); // stop observation after click
+      }
+    });
+  });
+  // Configuration of the observer:
+  const config = { attributes: true, childList: true, subtree: true };
+
+  // Start observing the target node for configured mutations
+  // You may need to adjust the target node based on the specific page structure or if anything gets moved by Envestnet in the future...
+  observer.observe(document.body, config);
+}
+
 // Utility functions defined above...
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
