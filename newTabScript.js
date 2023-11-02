@@ -1,4 +1,3 @@
-
 // NEWTABSCRIPT.JS **
 // Step 4: running the scripts for the new tab **
 
@@ -186,11 +185,10 @@ function findElementByAriaLabel(label) {
   return document.querySelector(`[aria-label="${label}"]`);
 }
 
-
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
   const config = { attributes: false, childList: true, subTree: true };
-  
+
   const callback = function (mutationsList, observer) {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
@@ -261,7 +259,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 function processExcelData(data) {
-
   console.log("Processing data: ", data);
 
   // Check if data is an array and has the required index
@@ -279,8 +276,9 @@ function processExcelData(data) {
   // Additional processing...
   setTimeout(() => {
     const addClicked = addNameClick();
-
     console.log("Add button clicked? :", addClicked);
     if (addClicked) {
       setupObserverForModalRemoval(); // Set up the observer only if "Add" was clicked.
     }
+  }, 2000);
+}
