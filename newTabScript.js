@@ -8,7 +8,117 @@ if (window.hasInjectedScript) {
   throw new Error("Script already injected");
 }
 window.hasInjectedScript = true;
-//Clicks a certain button that says "Create household"
+
+// Define the mapping for styles
+
+// Find elements with style attribute containing 'left:'
+
+// HERE LIES ALL THE CLICKS //
+function clickSaveAndContinue() {
+  // Look for the button with text "Save and continue"
+  let buttons = document.querySelectorAll("button");
+  for (let button of buttons) {
+    if (button.textContent.includes("Save and continue")) {
+      console.log(`BUTTON FOUND WITH STRING "SAVE AND CONTINUE"`, button);
+
+      // Introduce a 2-second delay (2000 milliseconds) before clicking the button
+      setTimeout(() => {
+        // Create a new mouse event
+        let event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        // Dispatch the event on the button
+        button.dispatchEvent(event);
+        clickRiskToleranceButtonAfterDelay();
+      }, 2000);
+
+      return;
+    }
+  }
+  console.log("Save and continue button not found");
+}
+
+function clickRiskToleranceButtonAfterDelay() {
+  setTimeout(() => {
+    const button = document.querySelector(
+      'button[aria-label="I already know my client\'s risk tolerance"]'
+    );
+    if (button) {
+      button.click();
+      console.log("Clicked the 'I already know the risk tolerance' button.");
+
+      // Introduce a delay after clicking the risk tolerance button and then run adjustStyles
+      setTimeout(() => {
+        // Use the function to click the slider at 93%.
+        clickSliderAtPosition(93);
+        console.log("Adjusted the slider position after a delay.");
+      }, 2000); // Delay of 2 seconds (2000 milliseconds) to adjust the slider after clicking the button
+    }
+  }, 5000); // Delay of 5 seconds (5000 milliseconds) to click the button
+}
+function clickSliderAtPosition(percentage) {
+  // This function will click the slider at a specified percentage.
+
+  // Find the container with a role of 'button' which might be your slider container.
+  const sliderContainers = document.querySelectorAll('div[role="button"]');
+
+  // Use the Array find method to identify the correct slider container based on some unique property
+  // Here we assume that the slider is the only one that has children with the 'left' style set
+  const slider = Array.from(sliderContainers).find((container) => {
+    return Array.from(container.children).some((child) =>
+      child.style.left.includes("calc")
+    );
+  });
+
+  // If we have identified the slider, we can simulate a click.
+  if (slider) {
+    // Calculate where the click should be based on the percentage.
+    const rect = slider.getBoundingClientRect();
+    const clickX = rect.left + rect.width * (percentage / 100);
+    const clickY = rect.top + rect.height / 2;
+
+    // Create a new mouse event.
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      clientX: clickX,
+      clientY: clickY,
+    });
+
+    // Dispatch the event on the slider.
+    slider.dispatchEvent(clickEvent);
+  }
+}
+
+function addNameClick() {
+  let success = false; // Flag to indicate if click was successful.
+  let container = document.querySelector(".MuiDialogContent-root");
+  if (!container) {
+    console.log("Container not found");
+    return false;
+  }
+  console.log("MODAL FOUND: Searching <SPANS> 🔎");
+  let spans = container.querySelectorAll("span");
+  spans.forEach((span) => {
+    if (span.textContent.includes("Add")) {
+      console.log(`SPAN FOUND WITH STRING "ADD"`, span);
+      // Create a new mouse event
+      let event = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      // Dispatch the event on the target element...
+      span.dispatchEvent(event);
+      success = true;
+    }
+  });
+  return success; // Return the status
+}
+
 function clickSpan() {
   let success = false; // flag to indicate if click was successful
   // let wasClicked = false;  // Boolean to track if the desired span was clicked. another way of reading above^
@@ -97,72 +207,6 @@ function setupObserverForModalRemoval() {
   observer.observe(targetNode, config);
 }
 
-function clickSaveAndContinue() {
-  // Look for the button with text "Save and continue"
-  let buttons = document.querySelectorAll("button");
-  for (let button of buttons) {
-    if (button.textContent.includes("Save and continue")) {
-      console.log(`BUTTON FOUND WITH STRING "SAVE AND CONTINUE"`, button);
-
-      // Introduce a 2-second delay (2000 milliseconds) before clicking the button
-      setTimeout(() => {
-        // Create a new mouse event
-        let event = new MouseEvent("click", {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        });
-        // Dispatch the event on the button
-        button.dispatchEvent(event);
-        clickRiskToleranceButtonAfterDelay();
-      }, 2000);
-
-      return;
-    }
-  }
-  console.log("Save and continue button not found");
-}
-
-function clickRiskToleranceButtonAfterDelay() {
-  setTimeout(() => {
-    const button = document.querySelector(
-      'button[aria-label="I already know my client\'s risk tolerance"]'
-    );
-    if (button) {
-      button.click();
-      console.log("Clicked the risk tolerance button.");
-    } else {
-      console.error("Risk tolerance button not found.");
-    }
-  }, 5000); // Delay of 5 seconds (5000 milliseconds)
-}
-
-function addNameClick() {
-  let success = false; // Flag to indicate if click was successful.
-  let container = document.querySelector(".MuiDialogContent-root");
-  if (!container) {
-    console.log("Container not found");
-    return false;
-  }
-  console.log("MODAL FOUND: Searching <SPANS> 🔎");
-  let spans = container.querySelectorAll("span");
-  spans.forEach((span) => {
-    if (span.textContent.includes("Add")) {
-      console.log(`SPAN FOUND WITH STRING "ADD"`, span);
-      // Create a new mouse event
-      let event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-      });
-      // Dispatch the event on the target element...
-      span.dispatchEvent(event);
-      success = true;
-    }
-  });
-  return success; // Return the status
-}
-
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "automateData") {
@@ -172,13 +216,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
         const openName = clickSpan(); // call the autoclicker here
-        setupMutationObserver(message.data);
+        setupMutationObserverForModal(message.data);
         sendResponse({ status: openName ? "success" : "error" });
       });
     } else {
       //DOMContentLoaded already has fired
       const openName = clickSpan(); // Calling the span clicker here...
-      setupMutationObserver(message.data);
+      setupMutationObserverForModal(message.data);
       sendResponse({ status: openName ? "success" : "error" });
     }
     return true;
@@ -187,6 +231,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
 function processExcelData(data) {
   console.log("Processing data: ", data);
+
   // Check if data is an array and has the required index
   if (Array.isArray(data) && data.length > 29) {
     const formData = data[29]; // For example, using the 30th item in the array

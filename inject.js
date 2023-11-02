@@ -46,21 +46,3 @@ function startProposal() {
   // Possible that id changed if this is the case.
   return false;
 }
-
-// Below is a listener for a message from the popup.js file sender...
-
-// Below is function for autofilling for example,
-// function example() {
-
-// This function should contain the logic to start the automation process
-// For example, clicking buttons, filling in forms, etc.
-// You can put your steps for opening a new proposal tab here.
-
-// const startProp = document.getElementById("submit_create_nextgen_proposal");
-// if (startProp) {
-//Simulate a click on the first button
-// startProp.click();
-// return true;
-// }
-// return false;
-// }
