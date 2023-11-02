@@ -1,3 +1,4 @@
+
 // NEWTABSCRIPT.JS **
 // Step 4: running the scripts for the new tab **
 
@@ -142,6 +143,33 @@ function clickSpan() {
   });
   return success; // Return the status
 }
+// Below is the function to click the add button span element in order to submit name data to the database...
+function addNameClick() {
+  let success = false; // Flag to indicate if click was successful.
+  let container = document.querySelector(".MuiDialogContent-root");
+  if (!container) {
+    console.error("Container not found");
+    return false;
+  }
+  console.log("Modal container found, searching for spans");
+  let spans = container.querySelectorAll("span");
+  spans.forEach((span) => {
+    console.log("Checking span:", span);
+    if (span.textContent.includes("Add")) {
+      console.log("Add span found, attempting click...");
+      // Create a new mouse event
+      let event = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      // Dispatch the event on the target element...
+      span.dispatchEvent(event);
+      success = true;
+    }
+  });
+  return success; // Return the status
+}
 
 // Below is the function to click the add button span element in order to submit name data to the database...
 
@@ -158,14 +186,17 @@ function findElementByAriaLabel(label) {
   return document.querySelector(`[aria-label="${label}"]`);
 }
 
+
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
   const config = { attributes: false, childList: true, subTree: true };
+  
   const callback = function (mutationsList, observer) {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         if (mutation.target.querySelector(".modal-draggable-handle")) {
           console.log("MODAL DETECTED");
+
           processExcelData(data);
 
           // Disconnect the current observer since we found the modal
@@ -220,7 +251,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         sendResponse({ status: openName ? "success" : "error" });
       });
     } else {
-      //DOMContentLoaded already has fired
+      // DOMContentLoaded already has fired
       const openName = clickSpan(); // Calling the span clicker here...
       setupMutationObserverForModal(message.data);
       sendResponse({ status: openName ? "success" : "error" });
@@ -230,6 +261,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 });
 
 function processExcelData(data) {
+
   console.log("Processing data: ", data);
 
   // Check if data is an array and has the required index
@@ -247,9 +279,8 @@ function processExcelData(data) {
   // Additional processing...
   setTimeout(() => {
     const addClicked = addNameClick();
+
     console.log("Add button clicked? :", addClicked);
     if (addClicked) {
       setupObserverForModalRemoval(); // Set up the observer only if "Add" was clicked.
     }
-  }, 2000); // Adjust delay too long is noticable to short will mess up flow...
-}
