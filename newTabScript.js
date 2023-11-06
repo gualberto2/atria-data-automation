@@ -3,7 +3,6 @@
 
 // utility functions defined here below:
 
-
 // Step one, get data... data obtained, start automation
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -24,7 +23,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       sendResponse({ status: openName ? "success" : "error" });
     }
     return true;
-
   }
 });
 
@@ -59,7 +57,6 @@ function clickSpan() {
   return success; // Return the status
 }
 
- 
 // Step three-one
 // Find modal
 function setupMutationObserverForModal(data) {
@@ -218,7 +215,6 @@ function clickSaveAndContinue() {
   console.log("Save and continue button not found");
 }
 
-
 function clickRiskToleranceButtonAfterDelay() {
   setTimeout(() => {
     const button = document.querySelector(
@@ -235,6 +231,112 @@ function clickRiskToleranceButtonAfterDelay() {
       }, 5000); // Delay of 2 seconds (2000 milliseconds) to adjust the slider after clicking the button
     }
   }, 5000); // Delay of 5 seconds (5000 milliseconds) to click the button
+}
+
+// @@ -14,6 +14,110 @@ window.hasInjectedScript = true;
+
+function clickRiskAssessmentDropdown() {
+  console.log("Risk assessment function executed");
+
+  // Here we're specifically selecting the element with aria-haspopup='listbox'
+  const dropdown = document.querySelector(
+    "div.MuiSelect-root[aria-haspopup='listbox']"
+  );
+
+  if (dropdown) {
+    // aria-haspopup does not change, so we need to check aria-expanded instead
+    const isExpanded = dropdown.getAttribute("aria-expanded");
+    console.log(`Dropdown found. aria-expanded is: ${isExpanded}`);
+
+    // If the dropdown is not expanded or the attribute is not present
+    if (isExpanded !== "true") {
+      console.log("Dropdown is not expanded. Attempting to focus and click.");
+      // Focus on dropdown
+      dropdown.focus();
+      // Delay the click sequence to ensure scripts have time to load...
+      setTimeout(() => {
+        // Simulate mouse events to mimic user interaction
+        ["mousedown", "mouseup", "click"].forEach((eventType) => {
+          dropdown.dispatchEvent(
+            new MouseEvent(eventType, {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            })
+          );
+        });
+
+        // Check if the dropdown opened after the events
+        setTimeout(() => {
+          const expandedStateAfterClick =
+            dropdown.getAttribute("aria-expanded");
+          if (expandedStateAfterClick === "true") {
+            console.log("Dropdown has been expanded successfully");
+          } else {
+            console.error("Dropdown did not expand as expected");
+          }
+        }, 500); // Adjust this delay as necessary
+      }, 500); // Adjust this delay as necessary
+    } else {
+      console.log(`Dropdown is already expanded. aria-expanded: ${isExpanded}`);
+    }
+  } else {
+    console.error(
+      "Unable to find the dropdown element with aria-haspopup='listbox'"
+    );
+  }
+}
+
+function clickRiskAssessmentOption() {
+  console.log("Selecting the risk assessment option.");
+
+  // Since we want to wait for a few seconds before executing,
+  // you might want to call this function after a setTimeout where you handle the timing.
+
+  // Select the <li> element with the specific data-value
+  const option = document.querySelector(
+    'li[data-value="Existing client (Current risk-tolerance questionnaire is on file)"]'
+  );
+
+  if (option && !option.getAttribute("aria-disabled")) {
+    console.log("Option found. Attempting to click.");
+
+    // Focus on the option
+    option.focus();
+
+    // Delay the click sequence to ensure scripts have time to react to the focus
+    setTimeout(() => {
+      // Simulate mouse events to mimic user interaction
+      ["mousedown", "mouseup", "click"].forEach((eventType) => {
+        option.dispatchEvent(
+          new MouseEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+          })
+        );
+      });
+
+      // After clicking, you might want to check if the option got selected
+      // This is usually indicated by a class change or an attribute change
+      setTimeout(() => {
+        // Implement the check based on how your UI indicates selection
+        // For example:
+        // if (option.classList.contains('selected-class')) {
+        //   console.log("Option has been selected successfully");
+        // } else {
+        //   console.error("Option did not get selected as expected");
+        // }
+
+        // Placeholder for actual check
+        console.log("Clicked on the option. Implement actual check as needed.");
+      }, 500); // Adjust this delay as necessary
+    }, 500); // Adjust this delay as necessary
+  } else if (option) {
+    console.error("Option is disabled and cannot be clicked.");
+  } else {
+    console.error("Unable to find the option element");
+  }
 }
 
 // function standardizeColor(str) {
@@ -337,4 +439,3 @@ function clickRiskToleranceButtonAfterDelay() {
 //   Growth: "calc(78.5% - 14px)",
 //   Aggressive: "calc(93% - 14px)",
 // };
-
