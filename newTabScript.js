@@ -7,8 +7,6 @@
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "automateData") {
-    console.log("Excel data retrieved:", message.data);
-
     // Ensure webpage content (DOM) is fully loaded before taking action.
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
@@ -25,11 +23,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     return true;
   }
 });
-
-if (window.hasInjectedScript) {
-  throw new Error("Script already injected");
-}
-window.hasInjectedScript = true;
 
 // Step two, click "Create household" button
 function clickSpan() {
@@ -51,7 +44,7 @@ function clickSpan() {
       span.dispatchEvent(event);
       success = true; // Return whether the desired span was clicked or not.
       // _DEV USE
-      console.log("Creating new household...");
+      console.log("Creating new household button...");
     }
   });
   return success; // Return the status
@@ -67,7 +60,7 @@ function setupMutationObserverForModal(data) {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         if (mutation.target.querySelector(".modal-draggable-handle")) {
-          console.log("MODAL DETECTED");
+          console.log("MODAL_DETECTED");
           processExcelData(data);
 
           // Disconnect the current observer since we found the modal
@@ -103,7 +96,7 @@ function setupMutationObserverForModal(data) {
     let success = false; // Flag to indicate if click was successful.
     let container = document.querySelector(".MuiDialogContent-root");
     if (!container) {
-      console.log("Container not found");
+      console.log("MODAL_NOT_FOUND");
       return false;
     }
     console.log("MODAL FOUND: Searching <SPANS> 🔎");
@@ -305,6 +298,8 @@ function clickRiskAssessmentOption() {
 
     if (targetOption) {
       targetOption.click();
+      console.log("Clicked option - MAIN FUNC");
+      clickTermsCheckbox();
       return true; // Indicate success
     }
     return false; // Indicate failure
@@ -331,9 +326,46 @@ function clickRiskAssessmentOption() {
       const dropdown = document.querySelector("div.MuiSelect-root");
       if (dropdown) {
         dropdown.click();
+        console.log("Clicked option - BACKUP FUNC");
+        clickTermsCheckbox();
       }
     }, 300); // Adjust the timeout as necessary
   } else {
     observer.disconnect(); // If we clicked the option, disconnect the observer
+  }
+}
+
+function clickTermsCheckbox() {
+  // Find button by its role and aria-label attributes
+  const checkBoxButton = document.querySelector(
+    'button[role="checkbox"][aria-label="I confirm the terms and conditions for selecting my client\'s risk"]'
+  );
+
+  if (checkBoxButton) {
+    checkBoxButton.click();
+    console.log("Checkbox button clicked!");
+    setTimeout(() => {
+      console.log("Clicking agree to terms button");
+      termsCheckboxConfirmation();
+    }, 2000);
+  }
+}
+
+function termsCheckboxConfirmation() {
+  // Use XPath to find the button based on its text content
+  var xpath = "//button[.//span[contains(text(), 'I agree')]]";
+  var agreeButton = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue;
+
+  if (agreeButton) {
+    agreeButton.click();
+    console.log("Agree button clicked!");
+  } else {
+    console.log("Agree button not found!");
   }
 }
