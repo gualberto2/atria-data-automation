@@ -2,36 +2,29 @@
 // This is ran at the my.advisor portal **
 // Step 2 in the automation process **
 
-function getExcelDataFromStorage() {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get("excelData", (result) => {
-      if (chrome.runtime.lastError) {
-        return reject(chrome.runtime.lastError);
-      }
-      resolve(result.excelData);
-    });
-  });
-}
+let excelDataFromStorage = null;
 
-// Usage:
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+chrome.storage.local.get("excelData", function (result) {
+  excelDataFromStorage = result.excelData;
+  if (!excelDataFromStorage) {
+    console.log("excelData not found in storage");
+  }
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startInjection") {
-    try {
-      const excelDataFromStorage = await getExcelDataFromStorage();
-      if (!excelDataFromStorage) {
-        sendResponse({
-          status: "error",
-          reason: "No excel data found in storage",
-        });
-        return;
-      }
-      // ...rest of your code...
-    } catch (error) {
-      console.error(error);
+    if (!excelDataFromStorage) {
       sendResponse({
         status: "error",
-        reason: "Failed to retrieve storage data",
+        reason: "No excel data found in storage",
       });
+      return;
+    }
+    const injectionResult = startProposal();
+    if (injectionResult) {
+      sendResponse({ status: "success", data: excelDataFromStorage });
+    } else {
+      sendResponse({ status: "error" });
     }
   }
 });
