@@ -42,7 +42,6 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
       // Injecting a Script into a Tab:
       chrome.scripting.executeScript(
-        // Parameters and its given data
         {
           target: { tabId: tabId },
           files: ["newTabScript.js"],
@@ -70,6 +69,11 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
               });
             }, 2000); // A 2 second delay
           }
+          console.log("Sending automateData message to tab");
+          chrome.tabs.sendMessage(tabId, {
+            action: "automateData",
+            data: excelData, // Passing the excelData here to newTabScript.js
+          });
         }
       );
     });
