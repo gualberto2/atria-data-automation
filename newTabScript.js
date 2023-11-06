@@ -3,6 +3,7 @@
 
 // utility functions defined here below:
 
+
 // Step one, get data... data obtained, start automation
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -23,6 +24,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       sendResponse({ status: openName ? "success" : "error" });
     }
     return true;
+
   }
 });
 
@@ -57,11 +59,13 @@ function clickSpan() {
   return success; // Return the status
 }
 
+ 
 // Step three-one
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
   const config = { attributes: false, childList: true, subTree: true };
+
   const callback = function (mutationsList, observer) {
     for (const mutation of mutationsList) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
@@ -214,6 +218,7 @@ function clickSaveAndContinue() {
   console.log("Save and continue button not found");
 }
 
+
 function clickRiskToleranceButtonAfterDelay() {
   setTimeout(() => {
     const button = document.querySelector(
@@ -332,3 +337,4 @@ function clickRiskToleranceButtonAfterDelay() {
 //   Growth: "calc(78.5% - 14px)",
 //   Aggressive: "calc(93% - 14px)",
 // };
+
