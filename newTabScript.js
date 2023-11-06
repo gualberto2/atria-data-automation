@@ -228,214 +228,112 @@ function clickRiskToleranceButtonAfterDelay() {
       setTimeout(() => {
         // Step four-two
         // Click slider to its proper location
-      }, 5000); // Delay of 2 seconds (2000 milliseconds) to adjust the slider after clicking the button
+        clickSliderAtPosition(93);
+      }, 2000); // Delay of 2 seconds (2000 milliseconds) to adjust the slider after clicking the button
     }
   }, 5000); // Delay of 5 seconds (5000 milliseconds) to click the button
+}
+
+function clickSliderAtPosition(percentage) {
+  const sliderContainers = document.querySelectorAll('div[role="button"]');
+
+  const slider = Array.from(sliderContainers).find((container) => {
+    return Array.from(container.children).some((child) =>
+      child.style.left.includes("calc")
+    );
+  });
+
+  if (slider) {
+    const rect = slider.getBoundingClientRect();
+    const clickX = rect.left + rect.width * (percentage / 100);
+    const clickY = rect.top + rect.height / 2;
+
+    const clickEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      clientX: clickX,
+      clientY: clickY,
+    });
+
+    slider.dispatchEvent(clickEvent);
+    setTimeout(() => {
+      // Step four-two
+      // Click slider to its proper location
+      clickRiskAssessmentDropdown();
+      console.log("Clicked assessment dropdown");
+    }, 2000);
+  }
 }
 
 // @@ -14,6 +14,110 @@ window.hasInjectedScript = true;
 
 function clickRiskAssessmentDropdown() {
-  console.log("Risk assessment function executed");
-
-  // Here we're specifically selecting the element with aria-haspopup='listbox'
   const dropdown = document.querySelector(
     "div.MuiSelect-root[aria-haspopup='listbox']"
   );
 
   if (dropdown) {
-    // aria-haspopup does not change, so we need to check aria-expanded instead
-    const isExpanded = dropdown.getAttribute("aria-expanded");
-    console.log(`Dropdown found. aria-expanded is: ${isExpanded}`);
-
-    // If the dropdown is not expanded or the attribute is not present
-    if (isExpanded !== "true") {
-      console.log("Dropdown is not expanded. Attempting to focus and click.");
-      // Focus on dropdown
-      dropdown.focus();
-      // Delay the click sequence to ensure scripts have time to load...
-      setTimeout(() => {
-        // Simulate mouse events to mimic user interaction
-        ["mousedown", "mouseup", "click"].forEach((eventType) => {
-          dropdown.dispatchEvent(
-            new MouseEvent(eventType, {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-            })
-          );
-        });
-
-        // Check if the dropdown opened after the events
-        setTimeout(() => {
-          const expandedStateAfterClick =
-            dropdown.getAttribute("aria-expanded");
-          if (expandedStateAfterClick === "true") {
-            console.log("Dropdown has been expanded successfully");
-          } else {
-            console.error("Dropdown did not expand as expected");
-          }
-        }, 500); // Adjust this delay as necessary
-      }, 500); // Adjust this delay as necessary
-    } else {
-      console.log(`Dropdown is already expanded. aria-expanded: ${isExpanded}`);
-    }
-  } else {
-    console.error(
-      "Unable to find the dropdown element with aria-haspopup='listbox'"
-    );
-  }
-}
-
-function clickRiskAssessmentOption() {
-  console.log("Selecting the risk assessment option.");
-
-  // Since we want to wait for a few seconds before executing,
-  // you might want to call this function after a setTimeout where you handle the timing.
-
-  // Select the <li> element with the specific data-value
-  const option = document.querySelector(
-    'li[data-value="Existing client (Current risk-tolerance questionnaire is on file)"]'
-  );
-
-  if (option && !option.getAttribute("aria-disabled")) {
-    console.log("Option found. Attempting to click.");
-
-    // Focus on the option
-    option.focus();
-
-    // Delay the click sequence to ensure scripts have time to react to the focus
+    dropdown.focus();
+    ["mousedown", "mouseup", "click"].forEach((eventType) => {
+      dropdown.dispatchEvent(
+        new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      );
+    });
     setTimeout(() => {
-      // Simulate mouse events to mimic user interaction
-      ["mousedown", "mouseup", "click"].forEach((eventType) => {
-        option.dispatchEvent(
-          new MouseEvent(eventType, {
-            bubbles: true,
-            cancelable: true,
-            view: window,
-          })
-        );
-      });
-
-      // After clicking, you might want to check if the option got selected
-      // This is usually indicated by a class change or an attribute change
-      setTimeout(() => {
-        // Implement the check based on how your UI indicates selection
-        // For example:
-        // if (option.classList.contains('selected-class')) {
-        //   console.log("Option has been selected successfully");
-        // } else {
-        //   console.error("Option did not get selected as expected");
-        // }
-
-        // Placeholder for actual check
-        console.log("Clicked on the option. Implement actual check as needed.");
-      }, 500); // Adjust this delay as necessary
-    }, 500); // Adjust this delay as necessary
-  } else if (option) {
-    console.error("Option is disabled and cannot be clicked.");
-  } else {
-    console.error("Unable to find the option element");
+      console.log("going to click n ext options");
+      clickRiskAssessmentOption();
+    }, 2000);
   }
 }
+function clickRiskAssessmentOption() {
+  const optionText =
+    "Existing client (Current risk-tolerance questionnaire is on file)";
 
-// function standardizeColor(str) {
-//   const ctx = document.createElement("canvas").getContext("2d");
-//   ctx.fillStyle = str;
-//   return ctx.fillStyle;
-// }
-// function clickDivByRiskTolerance(riskTolerance) {
-//   const toleranceColorMapping = {
-//     "Capital Preservation": "rgb(157, 196, 220)",
-//     Conservative: "rgb(138, 180, 205)",
-//     "Conservative Growth": "rgb(119, 163, 190)",
-//     Moderate: "rgb(100, 147, 175)",
-//     "Moderate Growth": "rgb(82, 130, 161)",
-//     Growth: "rgb(63, 114, 146)",
-//     Aggressive: "rgb(25, 81, 116)",
-//   };
+  // Define a function to click the target option when it's available
+  const tryClickOption = () => {
+    const options = Array.from(
+      document.querySelectorAll("ul.MuiList-root li.MuiMenuItem-root")
+    );
+    const targetOption = options.find((option) =>
+      option.textContent.includes(optionText)
+    );
 
-//   // Log the mapping for diagnostic purposes
-//   console.log("Tolerance Color Mapping:", toleranceColorMapping);
+    if (targetOption) {
+      targetOption.click();
+      return true; // Indicate success
+    }
+    return false; // Indicate failure
+  };
 
-//   const orderedTolerances = Object.keys(toleranceColorMapping);
-//   const toleranceDivs = [];
+  // Create an observer instance
+  const observer = new MutationObserver((mutations, obs) => {
+    if (tryClickOption()) {
+      // Try to click the option
+      obs.disconnect(); // If successful, disconnect the observer
+    }
+  });
 
-//   // Log the divs with background color styles
-//   console.log(
-//     "Divs with background color styles:",
-//     document.querySelectorAll('div[style*="background-color"]')
-//   );
+  // Start observing the body for changes in the DOM
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
 
-//   document.querySelectorAll('div[style*="background-color"]').forEach((div) => {
-//     const computedStyle = window.getComputedStyle(div);
-//     const backgroundColor = standardizeColor(computedStyle.backgroundColor);
-//     console.log(
-//       `Div background color: ${backgroundColor}, standardized to: ${standardizeColor(
-//         backgroundColor
-//       )}`
-//     );
-//     const toleranceIndex = orderedTolerances.findIndex((tolerance) => {
-//       return (
-//         standardizeColor(toleranceColorMapping[tolerance]) === backgroundColor
-//       );
-//     });
-
-//     if (toleranceIndex !== -1) {
-//       toleranceDivs[toleranceIndex] = div;
-//     }
-//   });
-
-//   // Log the collected divs for diagnostic purposes
-//   console.log("Collected divs mapped to tolerances:", toleranceDivs);
-
-//   // Ensure the divs array has no 'undefined' elements due to unassigned indexes
-//   const filteredToleranceDivs = toleranceDivs.filter(
-//     (div) => div !== undefined
-//   );
-
-//   // Click the div by its position in the mapping array, not by color
-//   const riskToleranceIndex = orderedTolerances.indexOf(riskTolerance);
-//   console.log(
-//     `Risk Tolerance Index: ${riskToleranceIndex}, Tolerance: ${riskTolerance}`
-//   );
-
-//   if (filteredToleranceDivs.length > riskToleranceIndex) {
-//     filteredToleranceDivs[riskToleranceIndex].click();
-//     console.log(`Clicked on div for risk tolerance: ${riskTolerance}`);
-//   } else {
-//     console.error(
-//       `No div found for risk tolerance: ${riskTolerance}, or the divs are not in the expected order.`
-//     );
-//   }
-// }
-
-// Step 5
-// Find the slider handle
-
-//IGNORE VVV
-// left: calc(7% - 14px);
-// left: calc(21.5% - 14px);
-// left: calc(36% - 14px);
-// left: calc(50% - 14px);
-// left: calc(64% - 14px);
-// left: calc(78.5% - 14px);
-// left: calc(93% - 14px);
-
-// Capital Preservation
-// Conservative
-// Conservative Growth
-// Moderate
-// Moderate Growth
-// Growth
-// Aggressive
-
-// const toleranceMapping = {
-//   "Capital Preservation": "calc(7% - 14px)",
-//   Conservative: "calc(21.5% - 14px)",
-//   "Conservative Growth": "calc(36% - 14px)",
-//   Moderate: "calc(50% - 14px)",
-//   "Moderate Growth": "calc(64% - 14px)",
-//   Growth: "calc(78.5% - 14px)",
-//   Aggressive: "calc(93% - 14px)",
-// };
+  // Try to click the option immediately in case it's already there
+  if (!tryClickOption()) {
+    // If the option was not clicked successfully, trigger the dropdown to show options
+    setTimeout(() => {
+      const dropdown = document.querySelector("div.MuiSelect-root");
+      if (dropdown) {
+        dropdown.click();
+      }
+    }, 300); // Adjust the timeout as necessary
+  } else {
+    observer.disconnect(); // If we clicked the option, disconnect the observer
+  }
+}
