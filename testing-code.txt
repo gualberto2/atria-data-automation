@@ -1,0 +1,100 @@
+// function standardizeColor(str) {
+//   const ctx = document.createElement("canvas").getContext("2d");
+//   ctx.fillStyle = str;
+//   return ctx.fillStyle;
+// }
+// function clickDivByRiskTolerance(riskTolerance) {
+//   const toleranceColorMapping = {
+//     "Capital Preservation": "rgb(157, 196, 220)",
+//     Conservative: "rgb(138, 180, 205)",
+//     "Conservative Growth": "rgb(119, 163, 190)",
+//     Moderate: "rgb(100, 147, 175)",
+//     "Moderate Growth": "rgb(82, 130, 161)",
+//     Growth: "rgb(63, 114, 146)",
+//     Aggressive: "rgb(25, 81, 116)",
+//   };
+
+//   // Log the mapping for diagnostic purposes
+//   console.log("Tolerance Color Mapping:", toleranceColorMapping);
+
+//   const orderedTolerances = Object.keys(toleranceColorMapping);
+//   const toleranceDivs = [];
+
+//   // Log the divs with background color styles
+//   console.log(
+//     "Divs with background color styles:",
+//     document.querySelectorAll('div[style*="background-color"]')
+//   );
+
+//   document.querySelectorAll('div[style*="background-color"]').forEach((div) => {
+//     const computedStyle = window.getComputedStyle(div);
+//     const backgroundColor = standardizeColor(computedStyle.backgroundColor);
+//     console.log(
+//       `Div background color: ${backgroundColor}, standardized to: ${standardizeColor(
+//         backgroundColor
+//       )}`
+//     );
+//     const toleranceIndex = orderedTolerances.findIndex((tolerance) => {
+//       return (
+//         standardizeColor(toleranceColorMapping[tolerance]) === backgroundColor
+//       );
+//     });
+
+//     if (toleranceIndex !== -1) {
+//       toleranceDivs[toleranceIndex] = div;
+//     }
+//   });
+
+//   // Log the collected divs for diagnostic purposes
+//   console.log("Collected divs mapped to tolerances:", toleranceDivs);
+
+//   // Ensure the divs array has no 'undefined' elements due to unassigned indexes
+//   const filteredToleranceDivs = toleranceDivs.filter(
+//     (div) => div !== undefined
+//   );
+
+//   // Click the div by its position in the mapping array, not by color
+//   const riskToleranceIndex = orderedTolerances.indexOf(riskTolerance);
+//   console.log(
+//     `Risk Tolerance Index: ${riskToleranceIndex}, Tolerance: ${riskTolerance}`
+//   );
+
+//   if (filteredToleranceDivs.length > riskToleranceIndex) {
+//     filteredToleranceDivs[riskToleranceIndex].click();
+//     console.log(`Clicked on div for risk tolerance: ${riskTolerance}`);
+//   } else {
+//     console.error(
+//       `No div found for risk tolerance: ${riskTolerance}, or the divs are not in the expected order.`
+//     );
+//   }
+// }
+
+// Step 5
+// Find the slider handle
+
+//IGNORE VVV
+// left: calc(7% - 14px);
+// left: calc(21.5% - 14px);
+// left: calc(36% - 14px);
+// left: calc(50% - 14px);
+// left: calc(64% - 14px);
+// left: calc(78.5% - 14px);
+// left: calc(93% - 14px);
+
+// Capital Preservation
+// Conservative
+// Conservative Growth
+// Moderate
+// Moderate Growth
+// Growth
+// Aggressive
+
+// const toleranceMapping = {
+//   "Capital Preservation": "calc(7% - 14px)",
+//   Conservative: "calc(21.5% - 14px)",
+//   "Conservative Growth": "calc(36% - 14px)",
+//   Moderate: "calc(50% - 14px)",
+//   "Moderate Growth": "calc(64% - 14px)",
+//   Growth: "calc(78.5% - 14px)",
+//   Aggressive: "calc(93% - 14px)",
+// };
