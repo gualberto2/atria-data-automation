@@ -384,30 +384,55 @@ function termsCheckboxConfirmation() {
   }
 }
 
-// Step four-eight
-// Confirm selected options, save and continue...
+// Step four-eight: Confirm selected options, save and continue...
 function saveAndContinueRandO() {
-  // Look for the span with text "Save and continue"
+  let spanFound = false;
   let spans = document.querySelectorAll("span");
+
   for (let span of spans) {
     if (span.textContent.includes("Save and continue")) {
       console.log(`SPAN FOUND WITH STRING "SAVE AND CONTINUE"`, span);
+      spanFound = true;
 
-      // Providing a delay before clicking to ensure any JS/CSS animations can finish
       setTimeout(() => {
-        // Create a new mouse event
-        let event = new MouseEvent("click", {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        });
-        // Dispatch the event on the span
-        span.dispatchEvent(event);
-        // Add any follow-up actions here, if necessary
-      }, 1000); // You can adjust the delay as needed
+        span.click(); // Simpler way to click without creating a MouseEvent
+        console.log("Clicked 'Save and continue'");
 
-      return;
+        setTimeout(() => {
+          // This delay waits for the page to process the save and continue action
+          clickAddAccountButton();
+        }, 4000); // The delay might need adjustment based on actual page behavior
+      }, 1000); // Waiting for animations to complete
+
+      break; // Exit the loop as we've found and clicked the span
     }
   }
-  console.log("Save and continue span not found");
+
+  if (!spanFound) {
+    console.log("Save and continue span not found");
+    // Handle the error case appropriately, possibly retrying or alerting the user
+  }
+}
+
+// BELOW ARE THE FUNCTIONS TO MANIPULATE THE ACCOUNT STRATEGY SECTION
+
+// step five-one: Click the add account button
+function clickAddAccountButton() {
+  let spans = document.querySelectorAll("span");
+
+  for (let span of spans) {
+    if (span.textContent.trim() === "Add account") {
+      // Using trim() to remove any leading/trailing whitespace
+      let button = span.closest("button");
+      if (button) {
+        button.click();
+        console.log('Clicked "Add account" button.');
+        return true;
+      }
+    }
+  }
+
+  console.log("Add account button not found.");
+  // Similar to above, handle the error case appropriately
+  return false;
 }
