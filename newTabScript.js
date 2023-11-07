@@ -1,7 +1,7 @@
 // NEWTABSCRIPT.JS **
 // Step 4: running the scripts for the new tab **
 
-// utility functions defined here below:
+// Utility functions defined here below:
 
 // Step one, get data... data obtained, start automation
 // Listener to act upon receiving messages from the Chrome extension.
@@ -179,7 +179,7 @@ function setupObserverForModalRemoval() {
   const observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
 }
-
+// Step four-one save and continue into the new risk and objective functions sections....
 function clickSaveAndContinue() {
   // Look for the button with text "Save and continue"
   let buttons = document.querySelectorAll("button");
@@ -207,7 +207,8 @@ function clickSaveAndContinue() {
   }
   console.log("Save and continue button not found");
 }
-
+// Step four-two
+// Click that we know our client's risks...
 function clickRiskToleranceButtonAfterDelay() {
   setTimeout(() => {
     const button = document.querySelector(
@@ -227,6 +228,8 @@ function clickRiskToleranceButtonAfterDelay() {
   }, 5000); // Delay of 5 seconds (5000 milliseconds) to click the button
 }
 
+// Step four-three
+// Slide the correlating client risks, based on RISK_ASSESSMENT::
 function clickSliderAtPosition(percentage) {
   const sliderContainers = document.querySelectorAll('div[role="button"]');
 
@@ -260,7 +263,8 @@ function clickSliderAtPosition(percentage) {
 }
 
 // @@ -14,6 +14,110 @@ window.hasInjectedScript = true;
-
+// Step four-four
+// Open the dropdown after the slider
 function clickRiskAssessmentDropdown() {
   const dropdown = document.querySelector(
     "div.MuiSelect-root[aria-haspopup='listbox']"
@@ -283,6 +287,9 @@ function clickRiskAssessmentDropdown() {
     }, 2000);
   }
 }
+
+// Step four-five
+// Click the option after dropdown is clicked and opened...
 function clickRiskAssessmentOption() {
   const optionText =
     "Existing client (Current risk-tolerance questionnaire is on file)";
@@ -334,7 +341,8 @@ function clickRiskAssessmentOption() {
     observer.disconnect(); // If we clicked the option, disconnect the observer
   }
 }
-
+// Step four-six
+// Click the terms dropdown...
 function clickTermsCheckbox() {
   // Find button by its role and aria-label attributes
   const checkBoxButton = document.querySelector(
@@ -350,7 +358,8 @@ function clickTermsCheckbox() {
     }, 2000);
   }
 }
-
+// Step four-seven
+// Click the checkbox to accept current clients risk and investment objective...
 function termsCheckboxConfirmation() {
   // Use XPath to find the button based on its text content
   var xpath = "//button[.//span[contains(text(), 'I agree')]]";
@@ -365,7 +374,40 @@ function termsCheckboxConfirmation() {
   if (agreeButton) {
     agreeButton.click();
     console.log("Agree button clicked!");
+    setTimeout(() => {
+      // Timeout to kickstart the saveandcontinue button
+      console.log("Clicking agree to terms button");
+      saveAndContinueRandO();
+    }, 1000);
   } else {
     console.log("Agree button not found!");
   }
+}
+
+// Step four-eight
+// Confirm selected options, save and continue...
+function saveAndContinueRandO() {
+  // Look for the span with text "Save and continue"
+  let spans = document.querySelectorAll("span");
+  for (let span of spans) {
+    if (span.textContent.includes("Save and continue")) {
+      console.log(`SPAN FOUND WITH STRING "SAVE AND CONTINUE"`, span);
+
+      // Providing a delay before clicking to ensure any JS/CSS animations can finish
+      setTimeout(() => {
+        // Create a new mouse event
+        let event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        // Dispatch the event on the span
+        span.dispatchEvent(event);
+        // Add any follow-up actions here, if necessary
+      }, 1000); // You can adjust the delay as needed
+
+      return;
+    }
+  }
+  console.log("Save and continue span not found");
 }
