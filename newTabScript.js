@@ -51,6 +51,7 @@ function clickSpan() {
 }
 
 // Step three-one
+let globalRegistrationType = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -130,9 +131,12 @@ function setupMutationObserverForModal(data) {
       setInputValueByAriaLabel("Enter household name", clientTitle);
       setInputValueByAriaLabel("First name", firstName);
       setInputValueByAriaLabel("Last name", lastName);
+
+      globalRegistrationType = formData.REGISTRATION || "Default Registration";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
+
     // Additional processing...
     setTimeout(() => {
       // Step three-four
@@ -262,7 +266,6 @@ function clickSliderAtPosition(percentage) {
   }
 }
 
-// @@ -14,6 +14,110 @@ window.hasInjectedScript = true;
 // Step four-four
 // Open the dropdown after the slider
 function clickRiskAssessmentDropdown() {
@@ -431,9 +434,96 @@ function clickAddAccountButton() {
         return true;
       }
     }
+    setTimeout(() => {
+      console.log("Preparing to select an option...");
+      // Call the function that handles the next step, such as clicking an option.
+      // Make sure the function 'clickRegistrationTypeOption' exists and is defined to handle option selection.
+      clickRegistrationTypeDropdown();
+    }, 2000);
   }
 
   console.log("Add account button not found.");
   // Similar to above, handle the error case appropriately
   return false;
+}
+
+// step five-three: Click select registration type
+function clickRegistrationTypeDropdown() {
+  // Query the document for the dropdown element
+  const dropdown = document.querySelector(
+    'div.MuiSelect-root[aria-haspopup="listbox"]'
+  );
+
+  if (dropdown) {
+    // Focus on the dropdown element
+    dropdown.focus();
+
+    // Dispatch mouse events to mimic the user's actions
+    ["mousedown", "mouseup", "click"].forEach((eventType) => {
+      dropdown.dispatchEvent(
+        new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      );
+    });
+
+    // Set a timeout to handle subsequent actions
+    setTimeout(() => {
+      console.log("Preparing to select an option...");
+      // Call the function that handles the next step, such as clicking an option.
+      // Make sure the function 'clickRegistrationTypeOption' exists and is defined to handle option selection.
+      clickRegistrationTypeOption();
+    }, 2000); // 2-second delay
+  }
+}
+function clickRegistrationTypeOption() {
+  // Define a function to click the target option when it's available
+  const tryClickOption = () => {
+    const options = Array.from(
+      document.querySelectorAll("ul.MuiList-root li.MuiMenuItem-root")
+    );
+    const targetOption = options.find((option) =>
+      option.textContent.includes(globalRegistrationType)
+    );
+
+    if (targetOption) {
+      targetOption.click();
+      console.log(
+        `Clicked registration type option: ${globalRegistrationType}`
+      );
+      // Add any additional logic you need after clicking the option
+      return true; // Indicate success
+    }
+    return false; // Indicate failure
+  };
+
+  // Create an observer instance
+  const observer = new MutationObserver((mutations, obs) => {
+    if (tryClickOption()) {
+      // Try to click the option
+      obs.disconnect(); // If successful, disconnect the observer
+    }
+  });
+
+  // Start observing the body for changes in the DOM
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Try to click the option immediately in case it's already there
+  if (!tryClickOption()) {
+    // If the option was not clicked successfully, trigger the dropdown to show options
+    setTimeout(() => {
+      const dropdown = document.querySelector("div.MuiSelect-root");
+      if (dropdown) {
+        dropdown.click();
+        console.log("Opened dropdown - waiting for options...");
+      }
+    }, 300); // Adjust the timeout as necessary
+  } else {
+    observer.disconnect(); // If we clicked the option, disconnect the observer
+  }
 }
