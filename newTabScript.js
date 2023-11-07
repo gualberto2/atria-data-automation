@@ -416,6 +416,7 @@ function saveAndContinueRandO() {
 
 // BELOW ARE THE FUNCTIONS TO MANIPULATE THE ACCOUNT STRATEGY SECTION
 
+//Version 0.39.1 - Nov 7 2023
 // step five-one: Click the add account button
 function clickAddAccountButton() {
   let spans = document.querySelectorAll("span");
