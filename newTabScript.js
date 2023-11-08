@@ -52,6 +52,8 @@ function clickSpan() {
 
 // Step three-one
 let globalRegistrationType = "";
+let globalCustodianType = "";
+let globalProposalAmount = 0;
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -133,6 +135,8 @@ function setupMutationObserverForModal(data) {
       setInputValueByAriaLabel("Last name", lastName);
 
       globalRegistrationType = formData.REGISTRATION || "Default Registration";
+      globalCustodianType = formData.CUSTODIAN || "Default Registration";
+      globalProposalAmount = formData.ACCOUNT_VALUE || 0;
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -435,10 +439,8 @@ function clickAddAccountButton() {
       }
     }
     setTimeout(() => {
-      console.log("Preparing to select an option...");
-      // Call the function that handles the next step, such as clicking an option.
-      // Make sure the function 'clickRegistrationTypeOption' exists and is defined to handle option selection.
-      clickRegistrationTypeDropdown();
+      console.log("Inputting proposal amount...");
+      setProposalAmount();
     }, 2000);
   }
 
@@ -447,18 +449,40 @@ function clickAddAccountButton() {
   return false;
 }
 
+function setProposalAmount() {
+  // Find the input field for the proposal amount by its aria-label
+  const proposalAmountInput = document.querySelector(
+    'input[aria-label="Proposal amount"]'
+  );
+
+  if (proposalAmountInput) {
+    // Parse the globalProposalAmount as a float number and ensure it's a finite number
+    const amount = parseFloat(globalProposalAmount);
+    if (isFinite(amount)) {
+      // Set the value of the input to the numeric globalProposalAmount
+      proposalAmountInput.value = amount;
+
+      // Simulate a change event to notify any JavaScript listening to this event
+      const event = new Event("change", { bubbles: true });
+      proposalAmountInput.dispatchEvent(event);
+
+      console.log(`Proposal amount set to ${amount}`);
+    }
+  }
+  setTimeout(() => {
+    console.log("Clicking registration dropdown...");
+    clickRegistrationTypeDropdown();
+  }, 2000);
+}
+
 // step five-three: Click select registration type
 function clickRegistrationTypeDropdown() {
-  // Query the document for the dropdown element
   const dropdown = document.querySelector(
     'div.MuiSelect-root[aria-haspopup="listbox"]'
   );
 
   if (dropdown) {
-    // Focus on the dropdown element
     dropdown.focus();
-
-    // Dispatch mouse events to mimic the user's actions
     ["mousedown", "mouseup", "click"].forEach((eventType) => {
       dropdown.dispatchEvent(
         new MouseEvent(eventType, {
@@ -469,15 +493,13 @@ function clickRegistrationTypeDropdown() {
       );
     });
 
-    // Set a timeout to handle subsequent actions
     setTimeout(() => {
       console.log("Preparing to select an option...");
-      // Call the function that handles the next step, such as clicking an option.
-      // Make sure the function 'clickRegistrationTypeOption' exists and is defined to handle option selection.
       clickRegistrationTypeOption();
     }, 2000); // 2-second delay
   }
 }
+
 function clickRegistrationTypeOption() {
   // Define a function to click the target option when it's available
   const tryClickOption = () => {
@@ -493,6 +515,93 @@ function clickRegistrationTypeOption() {
       console.log(
         `Clicked registration type option: ${globalRegistrationType}`
       );
+      setTimeout(() => {
+        console.log("Preparing to select an option...");
+        clickCustodianDropdown();
+      }, 2000); // 2-second delay
+
+      return true; // Indicate success
+    }
+    return false; // Indicate failure
+  };
+
+  // Create an observer instance
+  const observer = new MutationObserver((mutations, obs) => {
+    if (tryClickOption()) {
+      // Try to click the option
+      obs.disconnect(); // If successful, disconnect the observer
+    }
+  });
+
+  // Start observing the body for changes in the DOM
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Try to click the option immediately in case it's already there
+  if (!tryClickOption()) {
+    // If the option was not clicked successfully, trigger the dropdown to show options
+    setTimeout(() => {
+      const dropdown = document.querySelector("div.MuiSelect-root");
+      if (dropdown) {
+        dropdown.click();
+        console.log("Opened dropdown - waiting for options...");
+      }
+    }, 300); // Adjust the timeout as necessary
+  } else {
+    observer.disconnect(); // If we clicked the option, disconnect the observer
+  }
+}
+
+// step five-three: Click select registration type
+function clickCustodianDropdown() {
+  // Query the document for the dropdown element
+  const dropdownSpans = Array.from(
+    document.querySelectorAll(
+      'div.MuiSelect-root[aria-haspopup="listbox"] > span'
+    )
+  );
+  const custodianDropdown = dropdownSpans.find(
+    (span) => span.textContent === "Select a custodian"
+  )?.parentNode;
+
+  if (custodianDropdown) {
+    // Focus on the dropdown element
+    custodianDropdown.focus();
+
+    // Dispatch mouse events to mimic the user's actions
+    ["mousedown", "mouseup", "click"].forEach((eventType) => {
+      custodianDropdown.dispatchEvent(
+        new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      );
+    });
+
+    // Set a timeout to handle subsequent actions
+    setTimeout(() => {
+      console.log("Preparing to select an option...");
+      clickCustodianOption();
+    }, 2000); // 2-second delay
+  }
+}
+
+function clickCustodianOption() {
+  // Define a function to click the target option when it's available
+  const tryClickOption = () => {
+    const options = Array.from(
+      document.querySelectorAll("ul.MuiList-root li.MuiMenuItem-root")
+    );
+    const targetOption = options.find((option) =>
+      option.textContent.includes(globalCustodianType)
+    );
+
+    if (targetOption) {
+      targetOption.click();
+      console.log(`Clicked registration type option: ${globalCustodianType}`);
       // Add any additional logic you need after clicking the option
       return true; // Indicate success
     }
