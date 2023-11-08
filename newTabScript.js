@@ -54,6 +54,7 @@ function clickSpan() {
 let globalRegistrationType = "";
 let globalCustodianType = "";
 let globalProposalAmount = 0;
+let globalProgram = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -137,6 +138,7 @@ function setupMutationObserverForModal(data) {
       globalRegistrationType = formData.REGISTRATION || "Default Registration";
       globalCustodianType = formData.CUSTODIAN || "Default Registration";
       globalProposalAmount = formData.ACCOUNT_VALUE || 0;
+      globalProgram = formData.PROGRAM || "";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -651,10 +653,52 @@ function selectExistingStrategy() {
       // Simulate a click on this span
       span.click();
       console.log('Clicked "Select an existing strategy" span.');
+      setTimeout(() => {
+        console.log("Preparing to select an option...");
+        clickProgramOptionByContent(globalProgram);
+      }, 2000); // 2-second delay
       return true; // Indicate that the span was found and clicked
     }
   }
 
   console.log("Select an existing strategy span not found.");
   return false; // Indicate that the span was not found
+}
+
+function clickProgramOptionByContent(programString) {
+  // Define a function to click the target option when it's available
+  const tryClickProgramOption = () => {
+    const options = Array.from(
+      document.querySelectorAll("button[role='radio']")
+    );
+    const targetOption = options.find((option) => {
+      const labelSpan = option.nextElementSibling;
+      return labelSpan && labelSpan.textContent.includes(programString);
+    });
+
+    if (targetOption) {
+      targetOption.click();
+      console.log(`Clicked program option with string "${programString}"`);
+      return true; // Indicate success
+    }
+    return false; // Indicate failure if the target option wasn't found
+  };
+
+  // Create an observer instance to watch for when the modal is added to the DOM
+  const observer = new MutationObserver((mutations, obs) => {
+    if (tryClickProgramOption()) {
+      obs.disconnect(); // If successful, disconnect the observer
+    }
+  });
+
+  // Start observing the body for changes in the DOM
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Try to click the program option immediately in case it's already visible
+  if (!tryClickProgramOption()) {
+    console.log("Waiting for modal to appear...");
+  }
 }
