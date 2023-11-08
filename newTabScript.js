@@ -603,6 +603,10 @@ function clickCustodianOption() {
       targetOption.click();
       console.log(`Clicked registration type option: ${globalCustodianType}`);
       // Add any additional logic you need after clicking the option
+      setTimeout(() => {
+        console.log("Preparing to select an option...");
+        selectExistingStrategy();
+      }, 2000); // 2-second delay
       return true; // Indicate success
     }
     return false; // Indicate failure
@@ -635,4 +639,22 @@ function clickCustodianOption() {
   } else {
     observer.disconnect(); // If we clicked the option, disconnect the observer
   }
+}
+
+// // Function to find and click on the span that opens the modal for selecting an existing strategy
+function selectExistingStrategy() {
+  let spans = document.querySelectorAll("span");
+
+  for (let span of spans) {
+    // Using trim() to ensure there are no leading/trailing spaces
+    if (span.textContent.trim() === "Select an existing strategy") {
+      // Simulate a click on this span
+      span.click();
+      console.log('Clicked "Select an existing strategy" span.');
+      return true; // Indicate that the span was found and clicked
+    }
+  }
+
+  console.log("Select an existing strategy span not found.");
+  return false; // Indicate that the span was not found
 }
