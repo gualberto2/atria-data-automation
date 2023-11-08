@@ -51,10 +51,21 @@ function clickSpan() {
 }
 
 // Step three-one
+const riskToleranceToPercentage = {
+  "Capital Preservation": 7,
+  Conservative: 21.5,
+  "Conservative Growth": 36,
+  Moderate: 50,
+  "Moderate Growth": 64,
+  Growth: 78.5,
+  Aggressive: 93,
+};
+
 let globalRegistrationType = "";
 let globalCustodianType = "";
 let globalProposalAmount = 0;
 let globalProgram = "";
+let globalRiskTolerance = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -139,6 +150,7 @@ function setupMutationObserverForModal(data) {
       globalCustodianType = formData.CUSTODIAN || "Default Registration";
       globalProposalAmount = formData.ACCOUNT_VALUE || 0;
       globalProgram = formData.PROGRAM || "";
+      globalRiskTolerance = formData.PORTFOLIO_RISK || "";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -219,6 +231,11 @@ function clickSaveAndContinue() {
 }
 // Step four-two
 // Click that we know our client's risks...
+function adjustRiskToleranceSlider() {
+  const percentage = riskToleranceToPercentage[globalRiskTolerance] || 50; // Default to 50 if no match is found
+  clickSliderAtPosition(percentage);
+}
+
 function clickRiskToleranceButtonAfterDelay() {
   setTimeout(() => {
     const button = document.querySelector(
@@ -232,7 +249,7 @@ function clickRiskToleranceButtonAfterDelay() {
       setTimeout(() => {
         // Step four-two
         // Click slider to its proper location
-        clickSliderAtPosition(93);
+        adjustRiskToleranceSlider();
       }, 2000); // Delay of 2 seconds (2000 milliseconds) to adjust the slider after clicking the button
     }
   }, 5000); // Delay of 5 seconds (5000 milliseconds) to click the button
@@ -679,6 +696,11 @@ function clickProgramOptionByContent(programString) {
     if (targetOption) {
       targetOption.click();
       console.log(`Clicked program option with string "${programString}"`);
+
+      setTimeout(() => {
+        console.log("Preparing to select an option...");
+        clickStartSelectingButton();
+      }, 2000); // 2-second delay
       return true; // Indicate success
     }
     return false; // Indicate failure if the target option wasn't found
@@ -701,4 +723,17 @@ function clickProgramOptionByContent(programString) {
   if (!tryClickProgramOption()) {
     console.log("Waiting for modal to appear...");
   }
+}
+
+function clickStartSelectingButton() {
+  // Look for the button with the aria-label "Start Button"
+  let buttons = document.querySelectorAll('button[aria-label="Start Button"]');
+  for (let button of buttons) {
+    console.log('Button found with aria-label "Start Button"', button);
+    button.click();
+    console.log('Clicked "Start Selecting" button');
+
+    return; // Exit the function after clicking the button
+  }
+  console.log('"Start Selecting" button not found');
 }
