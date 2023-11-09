@@ -733,7 +733,6 @@ function clickStartSelectingButton() {
   for (let button of buttons) {
     button.click();
     setTimeout(() => {
-      console.log("Filtering name on portfolio...");
       setInputValueForNameFilterWhenModalAppears(nameOnPortfolio);
     }, 3000);
 
