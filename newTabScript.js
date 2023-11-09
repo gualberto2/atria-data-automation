@@ -754,6 +754,8 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
       });
 
       console.log(`Set input value to "${inputValue}"`);
+      observeTableAndFindRow(nameOnPortfolio);
+
       return true; // Indicate success
     }
     return false; // Indicate failure if the input field wasn't found
@@ -761,7 +763,6 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
 
   // This observer looks for changes in the DOM that indicate the modal has been added
   const observer = new MutationObserver((mutations) => {
-    console.log(mutations);
     for (const mutation of mutations) {
       if (mutation.addedNodes.length > 0) {
         // Check if the modal is now present
@@ -786,4 +787,39 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
   if (!trySetInputValue()) {
     console.log("Waiting for the modal to appear...");
   }
+}
+
+function observeTableAndFindRow(nameOnPortfolio) {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach((node) => {
+          // Check if the added node is a table row
+          if (node.role === "row") {
+            // Find the span containing the portfolio name
+            const spans = node.querySelectorAll("span");
+            spans.forEach((span) => {
+              if (span.textContent.trim() === nameOnPortfolio) {
+                console.log("Found row with portfolio name:", nameOnPortfolio);
+                // Find and click the radio button
+                const radioButton = node.querySelector('button[role="radio"]');
+                if (radioButton) {
+                  radioButton.click();
+                  console.log("Clicked the radio button for", nameOnPortfolio);
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  // Start observing the body for added elements
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  console.log("Observer has been set up. Waiting for the row to appear...");
 }
