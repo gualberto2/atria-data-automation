@@ -67,6 +67,7 @@ let globalProposalAmount = 0;
 let globalProgram = "";
 let globalRiskTolerance = "";
 let nameOnPortfolio = "";
+let feeSchedule = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -153,6 +154,7 @@ function setupMutationObserverForModal(data) {
       globalProgram = formData.PROGRAM || "";
       globalRiskTolerance = formData.PORTFOLIO_RISK || "";
       nameOnPortfolio = formData.NAME_ON_PORTFOLIO || "";
+      feeSchedule = formData.BILLING_FFREQUENCY || "Monthly";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -827,6 +829,25 @@ function observeTableAndFindRow(nameOnPortfolio) {
   console.log("Observer has been set up. Waiting for the row to appear...");
 }
 
+function saveContinue() {
+  let spanFound = false;
+  let spans = document.querySelectorAll("span");
+
+  for (let span of spans) {
+    if (span.textContent.includes("Save and continue")) {
+      console.log(`SPAN FOUND WITH STRING "SAVE AND CONTINUE"`, span);
+      spanFound = true;
+
+      setTimeout(() => {
+        span.click(); // Simpler way to click without creating a MouseEvent
+        console.log("Clicked 'Save and continue'");
+      }, 500); // Waiting for animations to complete
+
+      break; // Exit the loop as we've found and clicked the span
+    }
+  }
+}
+
 function clickSelectProductButton() {
   // Query for the button based on class name and content
   const buttons = Array.from(document.querySelectorAll("button"));
@@ -838,7 +859,55 @@ function clickSelectProductButton() {
   if (selectProductButton && !selectProductButton.disabled) {
     selectProductButton.click();
     console.log('Clicked the "Select product" button.');
+    setTimeout(() => {
+      saveContinue();
+      setTimeout(() => {
+        saveContinue();
+        setTimeout(() => {
+          clickFeeScheduleDropdownAndSelectOption();
+        }, 5000);
+      }, 3000);
+    }, 3000);
   } else {
     console.log("Button not found or it is disabled.");
+  }
+}
+
+function clickFeeScheduleDropdownAndSelectOption() {
+  // First, click the dropdown to reveal the options
+  const dropdown = document.querySelector(".MuiSelect-selectMenu");
+  if (dropdown) {
+    dropdown.focus();
+    ["mousedown", "mouseup", "click"].forEach((eventType) => {
+      dropdown.dispatchEvent(
+        new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      );
+    });
+    // Wait for the options to appear
+    setTimeout(() => {
+      // Look for the options in the list
+      const optionText = feeSchedule === "quarterly" ? "Quarterly" : "Monthly";
+      const listItems = document.querySelectorAll(
+        "ul.MuiList-root li.MuiMenuItem-root"
+      );
+
+      // Find the specific option
+      const optionToSelect = Array.from(listItems).find((item) => {
+        return item.innerText.includes(optionText);
+      });
+
+      if (optionToSelect) {
+        optionToSelect.click();
+        console.log(`Option "${optionText}" has been clicked.`);
+      } else {
+        console.log(`Option "${optionText}" not found.`);
+      }
+    }, 500); // Adjust this timeout to match the time it takes for the options to appear
+  } else {
+    console.log("Dropdown for fee schedule not found.");
   }
 }
