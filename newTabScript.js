@@ -66,6 +66,7 @@ let globalCustodianType = "";
 let globalProposalAmount = 0;
 let globalProgram = "";
 let globalRiskTolerance = "";
+let nameOnPortfolio = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -151,6 +152,7 @@ function setupMutationObserverForModal(data) {
       globalProposalAmount = formData.ACCOUNT_VALUE || 0;
       globalProgram = formData.PROGRAM || "";
       globalRiskTolerance = formData.PORTFOLIO_RISK || "";
+      nameOnPortfolio = formData.NAME_ON_PORTFOLIO || "";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -700,7 +702,7 @@ function clickProgramOptionByContent(programString) {
       setTimeout(() => {
         console.log("Preparing to select an option...");
         clickStartSelectingButton();
-      }, 2000); // 2-second delay
+      }, 20000);
       return true; // Indicate success
     }
     return false; // Indicate failure if the target option wasn't found
@@ -729,11 +731,60 @@ function clickStartSelectingButton() {
   // Look for the button with the aria-label "Start Button"
   let buttons = document.querySelectorAll('button[aria-label="Start Button"]');
   for (let button of buttons) {
-    console.log('Button found with aria-label "Start Button"', button);
     button.click();
-    console.log('Clicked "Start Selecting" button');
+    setTimeout(() => {
+      console.log("Filtering name on portfolio...");
+      setInputValueForNameFilterWhenModalAppears(nameOnPortfolio);
+    }, 3000);
 
     return; // Exit the function after clicking the button
   }
-  console.log('"Start Selecting" button not found');
+}
+
+function setInputValueForNameFilterWhenModalAppears(inputValue) {
+  const trySetInputValue = () => {
+    const input = document.querySelector(
+      `.MuiDrawer-root input[placeholder="Filter by name"]`
+    );
+
+    if (input) {
+      input.focus();
+      input.value = inputValue;
+      ["change", "input"].forEach((event) => {
+        input.dispatchEvent(new Event(event, { bubbles: true }));
+      });
+
+      console.log(`Set input value to "${inputValue}"`);
+      return true; // Indicate success
+    }
+    return false; // Indicate failure if the input field wasn't found
+  };
+
+  // This observer looks for changes in the DOM that indicate the modal has been added
+  const observer = new MutationObserver((mutations) => {
+    console.log(mutations);
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length > 0) {
+        // Check if the modal is now present
+        const modalExists = Array.from(mutation.addedNodes).some(
+          (node) => node.matches && node.matches(".MuiDrawer-root")
+        );
+        if (modalExists && trySetInputValue()) {
+          observer.disconnect(); // Disconnect the observer if successful
+          break; // Exit the loop
+        }
+      }
+    }
+  });
+
+  // Start observing the body for when elements are added to the DOM
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Try to set the input value immediately in case the modal is already visible
+  if (!trySetInputValue()) {
+    console.log("Waiting for the modal to appear...");
+  }
 }
