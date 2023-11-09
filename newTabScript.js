@@ -806,6 +806,9 @@ function observeTableAndFindRow(nameOnPortfolio) {
                 if (radioButton) {
                   radioButton.click();
                   console.log("Clicked the radio button for", nameOnPortfolio);
+                  setTimeout(() => {
+                    clickSelectProductButton();
+                  }, 3000);
                 }
               }
             });
@@ -822,4 +825,20 @@ function observeTableAndFindRow(nameOnPortfolio) {
   });
 
   console.log("Observer has been set up. Waiting for the row to appear...");
+}
+
+function clickSelectProductButton() {
+  // Query for the button based on class name and content
+  const buttons = Array.from(document.querySelectorAll("button"));
+  const selectProductButton = buttons.find((button) => {
+    return button.textContent.includes("Select product");
+  });
+
+  // Check if the button exists and is not disabled
+  if (selectProductButton && !selectProductButton.disabled) {
+    selectProductButton.click();
+    console.log('Clicked the "Select product" button.');
+  } else {
+    console.log("Button not found or it is disabled.");
+  }
 }
