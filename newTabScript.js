@@ -684,7 +684,6 @@ function selectExistingStrategy() {
   return false; // Indicate that the span was not found
 }
 
-<<<<<<< HEAD
 function clickProgramOptionByContent(programString) {
   // Define a function to click the target option when it's available
   const tryClickProgramOption = () => {
