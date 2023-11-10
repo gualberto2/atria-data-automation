@@ -68,6 +68,7 @@ let globalProgram = "";
 let globalRiskTolerance = "";
 let nameOnPortfolio = "";
 let feeSchedule = "";
+let feeTemplate = "";
 // Find modal
 function setupMutationObserverForModal(data) {
   const targetNode = document.body;
@@ -155,6 +156,7 @@ function setupMutationObserverForModal(data) {
       globalRiskTolerance = formData.PORTFOLIO_RISK || "";
       nameOnPortfolio = formData.NAME_ON_PORTFOLIO || "";
       feeSchedule = formData.BILLING_FFREQUENCY || "Monthly";
+      feeTemplate = formData.ADVISOR_FEE || "Standard";
     } else {
       console.error("Invalid data format or index out of bounds");
     }
@@ -171,7 +173,7 @@ function setupMutationObserverForModal(data) {
       if (addClicked) {
         setupObserverForModalRemoval(); // Set up the observer only if "Add" was clicked.
       }
-    }, 2000); // Adjust delay too long is noticable to short will mess up flow...
+    }, 3000); // Adjust delay too long is noticable to short will mess up flow...
   }
 
   const observer = new MutationObserver(callback);
@@ -193,7 +195,9 @@ function setupObserverForModalRemoval() {
         if (modalRemoved) {
           console.log("MODAL REMOVED");
           // Once the setupObserverForModalRemoval() is ran it will start the next function clickSaveAndContinue()
-          clickSaveAndContinue();
+          setTimeout(() => {
+            clickSaveAndContinue();
+          }, 4000);
 
           // Disconnect the observer since we detected the removal of the modal
           observer.disconnect();
@@ -431,8 +435,8 @@ function saveAndContinueRandO() {
         setTimeout(() => {
           // This delay waits for the page to process the save and continue action
           clickAddAccountButton();
-        }, 4000); // The delay might need adjustment based on actual page behavior
-      }, 1000); // Waiting for animations to complete
+        }, 7000); // The delay might need adjustment based on actual page behavior
+      }, 5000); // Waiting for animations to complete
 
       break; // Exit the loop as we've found and clicked the span
     }
@@ -464,7 +468,7 @@ function clickAddAccountButton() {
     setTimeout(() => {
       console.log("Inputting proposal amount...");
       setProposalAmount();
-    }, 2000);
+    }, 5000);
   }
 
   console.log("Add account button not found.");
@@ -541,7 +545,7 @@ function clickRegistrationTypeOption() {
       setTimeout(() => {
         console.log("Preparing to select an option...");
         clickCustodianDropdown();
-      }, 2000); // 2-second delay
+      }, 4000); // 2-second delay
 
       return true; // Indicate success
     }
@@ -608,7 +612,7 @@ function clickCustodianDropdown() {
     setTimeout(() => {
       console.log("Preparing to select an option...");
       clickCustodianOption();
-    }, 2000); // 2-second delay
+    }, 4000); // 2-second delay
   }
 }
 
@@ -629,7 +633,7 @@ function clickCustodianOption() {
       setTimeout(() => {
         console.log("Preparing to select an option...");
         selectExistingStrategy();
-      }, 2000); // 2-second delay
+      }, 4000); // 2-second delay
       return true; // Indicate success
     }
     return false; // Indicate failure
@@ -658,7 +662,7 @@ function clickCustodianOption() {
         dropdown.click();
         console.log("Opened dropdown - waiting for options...");
       }
-    }, 300); // Adjust the timeout as necessary
+    }, 4000); // Adjust the timeout as necessary
   } else {
     observer.disconnect(); // If we clicked the option, disconnect the observer
   }
@@ -736,7 +740,7 @@ function clickStartSelectingButton() {
     button.click();
     setTimeout(() => {
       setInputValueForNameFilterWhenModalAppears(nameOnPortfolio);
-    }, 3000);
+    }, 5000);
 
     return; // Exit the function after clicking the button
   }
@@ -756,6 +760,7 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
       });
 
       console.log(`Set input value to "${inputValue}"`);
+
       observeTableAndFindRow(nameOnPortfolio);
 
       return true; // Indicate success
@@ -810,7 +815,7 @@ function observeTableAndFindRow(nameOnPortfolio) {
                   console.log("Clicked the radio button for", nameOnPortfolio);
                   setTimeout(() => {
                     clickSelectProductButton();
-                  }, 3000);
+                  }, 5000);
                 }
               }
             });
@@ -841,7 +846,7 @@ function saveContinue() {
       setTimeout(() => {
         span.click(); // Simpler way to click without creating a MouseEvent
         console.log("Clicked 'Save and continue'");
-      }, 500); // Waiting for animations to complete
+      }, 2000); // Waiting for animations to complete
 
       break; // Exit the loop as we've found and clicked the span
     }
@@ -865,8 +870,8 @@ function clickSelectProductButton() {
         saveContinue();
         setTimeout(() => {
           clickFeeScheduleDropdownAndSelectOption();
-        }, 5000);
-      }, 3000);
+        }, 11000);
+      }, 5000);
     }, 3000);
   } else {
     console.log("Button not found or it is disabled.");
@@ -903,11 +908,187 @@ function clickFeeScheduleDropdownAndSelectOption() {
       if (optionToSelect) {
         optionToSelect.click();
         console.log(`Option "${optionText}" has been clicked.`);
+        setTimeout(() => {
+          clickEditAdvisorFeeButton();
+        }, 8000);
       } else {
         console.log(`Option "${optionText}" not found.`);
       }
     }, 500); // Adjust this timeout to match the time it takes for the options to appear
   } else {
     console.log("Dropdown for fee schedule not found.");
+  }
+}
+
+function clickEditAdvisorFeeButton() {
+  // Query the document for the button with the specific aria-label
+  const button = document.querySelector(
+    'button[aria-label="edit-advisor-fee"]'
+  );
+
+  // Check if the button exists
+  if (button) {
+    button.click(); // Click the button
+    console.log('Clicked the "edit-advisor-fee" button.');
+    setTimeout(() => {
+      setupModalObserverAndClickDropdown();
+      setTimeout(() => {
+        clickDropdownMenu();
+      }, 5000);
+    }, 5000);
+  }
+}
+
+function setupModalObserverAndClickDropdown() {
+  // Define the observer
+  const observer = new MutationObserver((mutations, obs) => {
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length > 0) {
+        // Check for the specific modal class
+        const modalExists = Array.from(mutation.addedNodes).some(
+          (node) => node.matches && node.matches(".MuiDialog-scrollPaper")
+        );
+
+        if (modalExists) {
+          console.log("Modal detected, clicking dropdown...");
+          setTimeout(() => {
+            clickDropdownMenu();
+          }, 5000);
+          obs.disconnect(); // Disconnect the observer after clicking the dropdown
+          break;
+        }
+      }
+    }
+  });
+
+  // Start observing the document body for added nodes
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+function clickDropdownMenu() {
+  // Select all dropdowns
+  const dropdowns = document.querySelectorAll(
+    "div.MuiSelect-root[aria-haspopup='listbox']"
+  );
+
+  // Find the dropdown that contains the specific span text
+  const targetDropdown = Array.from(dropdowns).find((dropdown) => {
+    const span = dropdown.querySelector("span");
+    return span && span.textContent === "Select a fee template";
+  });
+
+  if (targetDropdown) {
+    targetDropdown.focus();
+    ["mousedown", "mouseup", "click"].forEach((eventType) => {
+      targetDropdown.dispatchEvent(
+        new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+      );
+    });
+    console.log("Dropdown with 'Select a fee template' clicked.");
+    setTimeout(() => {
+      clickFeeTemplateOption(feeTemplate);
+    }, 5000);
+  } else {
+    console.log("Specific dropdown not found.");
+  }
+}
+
+function clickFeeTemplateOption(feeTemplate) {
+  // Wait for the dropdown to be opened and rendered in the DOM
+  const interval = setInterval(() => {
+    const options = document.querySelectorAll(
+      ".MuiMenu-paper .MuiMenuItem-root"
+    );
+    if (options.length > 0) {
+      clearInterval(interval);
+
+      // Find the option that includes the fee template text
+      const targetOption = Array.from(options).find((option) =>
+        option.textContent.includes(feeTemplate)
+      );
+
+      if (targetOption) {
+        targetOption.click();
+        console.log(`Clicked fee template option: ${feeTemplate}`);
+        setTimeout(() => {
+          clickApplyButton(feeTemplate);
+        }, 1000);
+      } else {
+        console.log(`Fee template option '${feeTemplate}' not found.`);
+      }
+    }
+  }, 500); // Check every 500 milliseconds
+}
+function clickApplyButton() {
+  // Select all buttons
+  const buttons = document.querySelectorAll('button[type="button"]');
+
+  // Find the button with the text "Apply"
+  const targetButton = Array.from(buttons).find((button) =>
+    button.textContent.includes("Apply")
+  );
+
+  if (targetButton) {
+    targetButton.click();
+    console.log("Clicked 'Apply' button.");
+    setTimeout(() => {
+      clickAgreeButton();
+    }, 5000);
+  } else {
+    console.log("'Apply' button not found.");
+  }
+}
+
+function clickAgreeButton() {
+  // Find the span containing the specific text
+  const span = Array.from(document.querySelectorAll("span")).find((span) =>
+    span.textContent.includes("I agree to the fee schedules shown above")
+  );
+
+  if (span) {
+    // Find the button within the parent of the span
+    const button = span.parentElement.querySelector('button[role="checkbox"]');
+    if (button) {
+      button.click();
+      console.log("Clicked 'I agree' checkbox button.");
+      setTimeout(() => {
+        clickContinueButton();
+      }, 5000);
+    } else {
+      console.log("'I agree' checkbox button not found.");
+    }
+  } else {
+    console.log("Span with 'I agree' text not found.");
+  }
+}
+
+function clickContinueButton() {
+  // Find the span containing the specific text "Continue"
+  const span = Array.from(document.querySelectorAll("button span")).find(
+    (span) => span.textContent.includes("Continue")
+  );
+
+  if (span) {
+    // Get the button that is the ancestor of the span
+    const button = span.closest("button");
+    if (button) {
+      if (!button.disabled) {
+        button.click();
+        console.log("Clicked 'Continue' button.");
+      } else {
+        console.log("'Continue' button is disabled.");
+      }
+    } else {
+      console.log("'Continue' button not found.");
+    }
+  } else {
+    console.log("Span with 'Continue' text not found.");
   }
 }
