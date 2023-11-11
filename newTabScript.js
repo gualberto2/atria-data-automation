@@ -1082,13 +1082,30 @@ function clickContinueButton() {
       if (!button.disabled) {
         button.click();
         console.log("Clicked 'Continue' button.");
-      } else {
-        console.log("'Continue' button is disabled.");
+        setTimeout(() => {
+          clickGenerateDocumentsButton();
+        }, 5000);
       }
+    }
+  }
+}
+
+function clickGenerateDocumentsButton() {
+  // Find the span containing the specific text "Generate documents"
+  const span = Array.from(document.querySelectorAll("button span")).find(
+    (span) => span.textContent.includes("Generate documents")
+  );
+
+  if (span) {
+    // Get the button that is the ancestor of the span
+    const button = span.closest("button");
+    if (button) {
+      button.click();
+      console.log("Clicked 'Generate documents' button.");
     } else {
-      console.log("'Continue' button not found.");
+      console.log("'Generate documents' button not found.");
     }
   } else {
-    console.log("Span with 'Continue' text not found.");
+    console.log("Span with 'Generate documents' text not found.");
   }
 }
