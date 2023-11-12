@@ -1102,10 +1102,19 @@ function clickGenerateDocumentsButton() {
     if (button) {
       button.click();
       console.log("Clicked 'Generate documents' button.");
+      setTimeout(() => {
+        closeCurrentTab();
+      }, 2000);
     } else {
       console.log("'Generate documents' button not found.");
     }
   } else {
     console.log("Span with 'Generate documents' text not found.");
   }
+}
+
+//NEWTABSCRIPT
+function closeCurrentTab() {
+  // Send a message to the background script
+  chrome.runtime.sendMessage({ action: "closeTab" });
 }

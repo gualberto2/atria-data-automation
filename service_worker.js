@@ -2,6 +2,27 @@
 // This is step 3 - after proposal button is clicked on the my.advisor page
 
 const injectedTabs = new Set();
+let currentIndex = 29; // Starting index
+let excelData; // Array of data from Excel sheet
+
+// Save current index to storage
+chrome.storage.local.set({ currentIndex: currentIndex });
+
+// Load current index from storage
+chrome.storage.local.get("currentIndex", function (data) {
+  currentIndex = data.currentIndex || 29; // Default to 29 if not set
+});
+
+// Function to process an array
+function processArray(index) {
+  if (index < excelData.length) {
+    // Assuming you have a logic to open a new tab or navigate to the URL
+    openTabOrNavigate(); // Replace this with your actual function to open/navigate to the tab
+  } else {
+    console.log("All arrays processed");
+    // End process or perform any final steps
+  }
+}
 
 // This part of the script monitors any navigation to certain URLS **
 // As shown in the declaration for "targetURLS = [...]" **
@@ -76,33 +97,23 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   }
 });
 
-// This extension listens for messages from other scripts to automate certain tasks, like populating fields in the active tab.
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // When a message is received, the script checks if the action property of the message
-  // is "populateFieldsFromNewTabScript". If it is, the nested code block is executed.
-  if (message.action === "populateFieldsFromNewTabScript") {
-    // Querying for the Active Tab:
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      // Extracting the Active Tab:
-      const activeTab = tabs[0];
-
-      // Sending a Message to the Active Tab:
-      chrome.tabs.sendMessage(
-        activeTab.id,
-        {
-          action: "populateFields",
-          data: message.data,
-          mapping: message.mapping,
-        },
-        (response) => {
-          sendResponse(response);
-        }
-      );
-    });
-    return true; // This is needed for async response
-  }
-});
-
 chrome.tabs.onRemoved.addListener(function (tabId) {
   injectedTabs.delete(tabId);
+});
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.action === "closeTab") {
+    // Close the current tab
+    chrome.tabs.remove(sender.tab.id, function () {
+      console.log("Tab closed");
+      currentIndex++; // Increment for the next item
+      if (currentIndex < excelData.length) {
+        // Send a message to inject.js to start the next proposal
+        chrome.tabs.sendMessage(sender.tab.id, {
+          action: "startNextProposal",
+          currentIndex: currentIndex,
+        });
+      }
+    });
+  }
 });
