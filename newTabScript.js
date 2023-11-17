@@ -8,16 +8,17 @@
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "automateData") {
     // Ensure webpage content (DOM) is fully loaded before taking action.
+    const index = message.currentIndex;
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", function () {
         const openName = clickSpan(); // call the autoclicker here
-        setupMutationObserverForModal(message.data);
+        setupMutationObserverForModal(message.data, index);
         sendResponse({ status: openName ? "success" : "error" });
       });
     } else {
       //DOMContentLoaded already has fired
       const openName = clickSpan(); // Calling the span clicker here...
-      setupMutationObserverForModal(message.data);
+      setupMutationObserverForModal(message.data, index);
       sendResponse({ status: openName ? "success" : "error" });
     }
     return true;
@@ -69,8 +70,10 @@ let globalRiskTolerance = "";
 let nameOnPortfolio = "";
 let feeSchedule = "";
 let feeTemplate = "";
+let jointFirst = "";
+let jointLast = "";
 // Find modal
-function setupMutationObserverForModal(data) {
+function setupMutationObserverForModal(data, index) {
   const targetNode = document.body;
   const config = { attributes: false, childList: true, subTree: true };
 
@@ -79,7 +82,7 @@ function setupMutationObserverForModal(data) {
       if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
         if (mutation.target.querySelector(".modal-draggable-handle")) {
           console.log("MODAL_DETECTED");
-          processExcelData(data);
+          processExcelData(data, index);
 
           // Disconnect the current observer since we found the modal
           observer.disconnect();
@@ -136,12 +139,13 @@ function setupMutationObserverForModal(data) {
     return success; // Return the status
   }
 
-  function processExcelData(data) {
-    console.log("Processing data: ", data);
+  function processExcelData(data, index) {
+    console.log("Processing data for index: ", index);
+    console.log("Received data:", data);
+    console.log("Received index:", index);
 
-    // Check if data is an array and has the required index
-    if (Array.isArray(data) && data.length > 29) {
-      const formData = data[29]; // For example, using the 30th item in the array
+    if (Array.isArray(data) && index < data.length) {
+      const formData = data[index];
       const clientTitle = formData.CLIENT_TITLE || "Default Title"; // Fallback value
       const firstName = formData.FIRST_NAME || "Default FName"; // Fallback value for name
       const lastName = formData.LAST_NAME || "Default LNAME"; //Fallback for last name
@@ -157,23 +161,133 @@ function setupMutationObserverForModal(data) {
       nameOnPortfolio = formData.NAME_ON_PORTFOLIO || "";
       feeSchedule = formData.BILLING_FFREQUENCY || "Monthly";
       feeTemplate = formData.ADVISOR_FEE || "Standard";
+
+      setTimeout(() => {
+        const addClicked = addNameClick();
+        console.log("Add button clicked? :", addClicked);
+
+        if (addClicked) {
+          // Check if it's a joint account and add a secondary owner
+          if (globalRegistrationType.includes("Joint")) {
+            jointFirst = formData.JOINT_OWNER_FIRST_NAME || "";
+            jointLast = formData.JOINT_OWNER_LAST_NAME || "";
+            setTimeout(() => {
+              clickAddMemberButton();
+            }, 3000);
+          } else {
+            setupObserverForModalRemoval();
+          }
+        }
+      }, 3000);
     } else {
       console.error("Invalid data format or index out of bounds");
     }
 
-    // Additional processing...
-    setTimeout(() => {
-      // Step three-four
-      // Click "Add" inside of modal
-      const addClicked = addNameClick();
-      console.log("Add button clicked? :", addClicked);
+    function clickAddMemberButton() {
+      const addMemberButton = document.querySelector(
+        'button[aria-label="add-member"]'
+      );
+      if (addMemberButton) {
+        addMemberButton.click();
+        console.log("Clicked 'Add member' button");
+        setTimeout(() => {
+          fillJointOwnerDetails();
+        }, 3000);
 
-      // Step three-five
-      // Once addClicked, run modal Closer
-      if (addClicked) {
-        setupObserverForModalRemoval(); // Set up the observer only if "Add" was clicked.
+        // Continue with the next step
+        // setTimeout(() => {
+        //   setupObserverForModalRemoval();
+        // }, 4000);
+      } else {
+        console.log("'Add member' button not found");
       }
-    }, 3000); // Adjust delay too long is noticable to short will mess up flow...
+    }
+
+    function fillJointOwnerDetails() {
+      const firstNameInput = document.querySelector(
+        'input[aria-label="First name"]'
+      );
+      const lastNameInput = document.querySelector(
+        'input[aria-label="Last name"]'
+      );
+
+      function triggerInputEvents(input) {
+        input.dispatchEvent(new Event("focus"));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        input.dispatchEvent(new Event("blur"));
+      }
+
+      if (firstNameInput && lastNameInput) {
+        firstNameInput.value = jointFirst;
+        triggerInputEvents(firstNameInput);
+
+        setTimeout(() => {
+          lastNameInput.value = jointLast;
+          triggerInputEvents(lastNameInput);
+          setTimeout(() => {
+            clickRelationshipDropdown();
+          }, 500);
+        }, 1000); // Delay for lastNameInput
+
+        console.log("Joint owner names set");
+      } else {
+        console.log("Joint owner name inputs not found");
+      }
+    }
+
+    function clickRelationshipDropdown() {
+      const dropdown = document.querySelector(
+        'div.MuiSelect-root[aria-haspopup="listbox"]'
+      );
+      if (dropdown) {
+        // Simulate focusing on the dropdown
+        dropdown.focus();
+        console.log("Focused on relationship dropdown");
+
+        // Simulate clicking the dropdown to open options
+        dropdown.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        dropdown.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        dropdown.click();
+        console.log("Clicked relationship dropdown");
+
+        // Select a relationship option after a delay
+        setTimeout(() => {
+          selectRelationshipOption();
+        }, 2000);
+      } else {
+        console.log("Relationship dropdown not found");
+      }
+    }
+    function selectRelationshipOption() {
+      // Example: Selecting 'Spouse' as the relationship
+      // Update the selector or text content based on actual options available
+      const optionText = "Other"; // Update this based on your needs
+      const options = document.querySelectorAll(
+        "ul.MuiList-root li.MuiMenuItem-root"
+      );
+      const targetOption = Array.from(options).find(
+        (option) => option.textContent === optionText
+      );
+
+      if (targetOption) {
+        targetOption.click();
+        console.log("Selected relationship:", optionText);
+        setTimeout(() => {
+          addNameClick();
+          setTimeout(() => {
+            clickSaveAndContinue();
+          }, 500);
+        }, 500);
+
+        // Continue with the next step after selecting the relationship
+        // setTimeout(() => {
+        //   setupObserverForModalRemoval();
+        // }, 2000);
+      } else {
+        console.log("Relationship option not found");
+      }
+    }
   }
 
   const observer = new MutationObserver(callback);
@@ -542,15 +656,166 @@ function clickRegistrationTypeOption() {
       console.log(
         `Clicked registration type option: ${globalRegistrationType}`
       );
+
       setTimeout(() => {
-        console.log("Preparing to select an option...");
-        clickCustodianDropdown();
-      }, 4000); // 2-second delay
+        if (globalRegistrationType.includes("Joint")) {
+          clickSelectOwnerButton();
+        } else {
+          setTimeout(() => {
+            clickCustodianDropdown();
+          }, 2000);
+        }
+      }, 2000);
 
       return true; // Indicate success
     }
     return false; // Indicate failure
   };
+  function clickSelectOwnerButton() {
+    // Find and click the "select owner" button
+    const selectOwnerButton = document.querySelector(
+      'button[aria-label="select owner"]'
+    );
+    if (selectOwnerButton) {
+      selectOwnerButton.click();
+      console.log("Clicked 'select owner' button");
+
+      // Wait for the secondary owner options to appear, then click
+      setTimeout(() => {
+        clickSecondaryOwnerDropdown();
+      }, 3000); // Adjust the delay as necessary
+    } else {
+      console.log("'select owner' button not found");
+    }
+  }
+
+  function clickSecondaryOwnerDropdown() {
+    // Define the text that will help us find the "Secondary owner" dropdown
+    const optionText = "Secondary owner";
+
+    // Define a function to try clicking the target dropdown when it's available
+    const interactWithDropdown = (dropdown) => {
+      dropdown.focus();
+      ["mousedown", "mouseup"].forEach((eventType) =>
+        dropdown.dispatchEvent(new MouseEvent(eventType, { bubbles: true }))
+      );
+      dropdown.click();
+      console.log("Interacted with 'Secondary owner' dropdown like a human");
+      setTimeout(() => {
+        clickAddMemberOption();
+      }, 1000);
+    };
+    const tryClickDropdown = () => {
+      const labels = Array.from(document.querySelectorAll("div"));
+      const targetLabel = labels.find(
+        (div) => div.textContent.trim() === optionText
+      );
+      const dropdown = targetLabel?.nextElementSibling.querySelector(
+        'div[role="button"][aria-haspopup="listbox"]'
+      );
+
+      if (dropdown) {
+        interactWithDropdown(dropdown);
+        return true; // Indicate success
+      }
+      return false; // Indicate failure
+    };
+
+    // Create an observer instance to watch for changes in the DOM
+    const observer = new MutationObserver((mutations, obs) => {
+      if (tryClickDropdown()) {
+        obs.disconnect(); // If successful, disconnect the observer
+      }
+    });
+
+    // Start observing the body for changes in the DOM
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Attempt to click the dropdown immediately in case it's already there
+    if (!tryClickDropdown()) {
+      // If the dropdown wasn't clicked successfully, it might be because the modal hasn't appeared yet
+      // Find and click the button or element that triggers the modal to open
+      const triggerElementSelector = 'button[aria-haspopup="dialog"]'; // Update this selector to match the element that opens the modal
+      const triggerElement = document.querySelector(triggerElementSelector);
+
+      if (triggerElement) {
+        triggerElement.click();
+        console.log("Triggered the modal to open");
+
+        // Since the modal opening is likely to be animated and take some time, set a timeout before trying to click the dropdown again
+        setTimeout(() => {
+          if (!tryClickDropdown()) {
+            console.error(
+              "Failed to click the 'Secondary owner' dropdown after opening the modal"
+            );
+            // Handle the failure as appropriate for your application
+          }
+        }, 1000); // Adjust the timeout as necessary to allow for the modal to fully open and render
+      } else {
+        console.error(
+          "Unable to find the element that triggers the modal to open"
+        );
+        // Handle this situation as appropriate for your application
+      }
+    } else {
+      observer.disconnect();
+    }
+  }
+
+  function clickAddMemberOption() {
+    const fullName = jointFirst + " " + jointLast;
+
+    // Function to find and click the option
+    const tryClickMemberOption = () => {
+      const options = Array.from(
+        document.querySelectorAll("ul.MuiList-root li.MuiMenuItem-root")
+      );
+      const targetOption = options.find((option) =>
+        option.textContent.includes(fullName)
+      );
+
+      if (targetOption) {
+        targetOption.click();
+        console.log(`Clicked on member: ${fullName}`);
+        setTimeout(() => {
+          clickSaveButton();
+        }, 1000);
+
+        return true; // Indicate success
+      }
+      return false; // Indicate failure
+    };
+
+    // Try to click the member option immediately
+    if (!tryClickMemberOption()) {
+      console.error(`Member with name ${fullName} not found`);
+      // Handle the failure as appropriate for your application
+    }
+  }
+
+  function clickSaveButton() {
+    // Find all buttons on the page
+    const buttons = Array.from(document.querySelectorAll("button"));
+
+    // Find the save button by its text content
+    const saveButton = buttons.find(
+      (button) => button.textContent.trim() === "Save"
+    );
+
+    if (saveButton) {
+      saveButton.click();
+      console.log("Clicked the 'Save' button");
+      setTimeout(() => {
+        clickCustodianDropdown();
+      }, 1000);
+    } else {
+      console.error("Save button not found");
+      // Handle the situation where the button is not found
+    }
+  }
 
   // Create an observer instance
   const observer = new MutationObserver((mutations, obs) => {

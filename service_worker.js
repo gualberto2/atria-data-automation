@@ -87,7 +87,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
               console.log("Sending automateData message to tab");
               chrome.tabs.sendMessage(tabId, {
                 action: "automateData",
-                data: excelData, // Passing the excelData here to newTabScript.js
+                data: excelData, // The entire data array
+                currentIndex: currentIndex, // Current index
               });
             }, 2000); // A 2 second delay
           }
@@ -101,19 +102,40 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
   injectedTabs.delete(tabId);
 });
 
+// background.js
+function sendStartNextProposalMessage() {
+  // Add a timeout to wait before checking for the target tab
+  setTimeout(function () {
+    chrome.tabs.query(
+      { url: "https://my.advisorlogin.com/*" },
+      function (tabs) {
+        if (tabs.length > 0) {
+          const targetTabId = tabs[0].id;
+          chrome.tabs.sendMessage(targetTabId, {
+            action: "startNextProposal",
+            currentIndex: currentIndex,
+          });
+        } else {
+          console.error("Target tab not found after waiting.");
+          // Handle the case where the target tab is still not found
+          // Optionally, you can open the tab here if it's critical for the next step
+        }
+      }
+    );
+  }, 3000); // Wait for 3000 milliseconds (3 seconds) before checking
+}
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "closeTab") {
     // Close the current tab
     chrome.tabs.remove(sender.tab.id, function () {
       console.log("Tab closed");
       currentIndex++; // Increment for the next item
-      if (currentIndex < excelData.length) {
-        // Send a message to inject.js to start the next proposal
-        chrome.tabs.sendMessage(sender.tab.id, {
-          action: "startNextProposal",
-          currentIndex: currentIndex,
-        });
-      }
+      chrome.storage.local.set({ currentIndex: currentIndex });
+
+      // Now send the message to start the next proposal
+      sendStartNextProposalMessage();
+      console.log("CURRENT INDEX (BG):", currentIndex);
     });
   }
 });

@@ -54,7 +54,6 @@ function startProposal(index) {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startNextProposal") {
-    currentIndex = message.currentIndex; // Update the current index
-    startProposal(currentIndex);
+    startProposal(message.currentIndex); // Use the received currentIndex
   }
 });
