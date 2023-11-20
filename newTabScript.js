@@ -973,7 +973,7 @@ function clickProgramOptionByContent(programString) {
       setTimeout(() => {
         console.log("Preparing to select an option...");
         clickStartSelectingButton();
-      }, 20000);
+      }, 15000);
       return true; // Indicate success
     }
     return false; // Indicate failure if the target option wasn't found
@@ -1026,7 +1026,9 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
 
       console.log(`Set input value to "${inputValue}"`);
 
-      observeTableAndFindRow(nameOnPortfolio);
+      setTimeout(() => {
+        findRowAndClickRadioButton(nameOnPortfolio);
+      }, 3000);
 
       return true; // Indicate success
     }
@@ -1061,61 +1063,28 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
   }
 }
 
-function observeTableAndFindRow(nameOnPortfolio) {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-        mutation.addedNodes.forEach((node) => {
-          // Check if the added node is a table row
-          if (node.role === "row") {
-            // Find the span containing the portfolio name
-            const spans = node.querySelectorAll("span");
-            spans.forEach((span) => {
-              if (span.textContent.trim() === nameOnPortfolio) {
-                console.log("Found row with portfolio name:", nameOnPortfolio);
-                // Find and click the radio button
-                const radioButton = node.querySelector('button[role="radio"]');
-                if (radioButton) {
-                  radioButton.click();
-                  console.log("Clicked the radio button for", nameOnPortfolio);
-                  setTimeout(() => {
-                    clickSelectProductButton();
-                  }, 5000);
-                }
-              }
-            });
-          }
-        });
+function findRowAndClickRadioButton(nameOnPortfolio) {
+  const rows = document.querySelectorAll('.MuiDrawer-root [role="row"]');
+  rows.forEach((row) => {
+    const nameCell = Array.from(row.querySelectorAll('div[role="cell"]')).find(
+      (cell) => cell.textContent.includes(nameOnPortfolio)
+    );
+
+    if (nameCell) {
+      console.log("Found row with portfolio name:", nameOnPortfolio);
+      const radioButton = nameCell.parentNode.querySelector(
+        'button[role="radio"]'
+      );
+      if (radioButton) {
+        radioButton.click();
+        console.log("Clicked the radio button for", nameOnPortfolio);
+        // Now proceed to click the "Select product" button after a delay
+        setTimeout(() => {
+          clickSelectProductButton();
+        }, 3000);
       }
-    });
-  });
-
-  // Start observing the body for added elements
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
-
-  console.log("Observer has been set up. Waiting for the row to appear...");
-}
-
-function saveContinue() {
-  let spanFound = false;
-  let spans = document.querySelectorAll("span");
-
-  for (let span of spans) {
-    if (span.textContent.includes("Save and continue")) {
-      console.log(`SPAN FOUND WITH STRING "SAVE AND CONTINUE"`, span);
-      spanFound = true;
-
-      setTimeout(() => {
-        span.click(); // Simpler way to click without creating a MouseEvent
-        console.log("Clicked 'Save and continue'");
-      }, 2000); // Waiting for animations to complete
-
-      break; // Exit the loop as we've found and clicked the span
     }
-  }
+  });
 }
 
 function clickSelectProductButton() {
@@ -1140,6 +1109,25 @@ function clickSelectProductButton() {
     }, 3000);
   } else {
     console.log("Button not found or it is disabled.");
+  }
+}
+
+function saveContinue() {
+  let spanFound = false;
+  let spans = document.querySelectorAll("span");
+
+  for (let span of spans) {
+    if (span.textContent.includes("Save and continue")) {
+      console.log(`SPAN FOUND WITH STRING "SAVE AND CONTINUE"`, span);
+      spanFound = true;
+
+      setTimeout(() => {
+        span.click(); // Simpler way to click without creating a MouseEvent
+        console.log("Clicked 'Save and continue'");
+      }, 2000); // Waiting for animations to complete
+
+      break; // Exit the loop as we've found and clicked the span
+    }
   }
 }
 

@@ -11,18 +11,8 @@ chrome.storage.local.set({ currentIndex: currentIndex });
 // Load current index from storage
 chrome.storage.local.get("currentIndex", function (data) {
   currentIndex = data.currentIndex || 29; // Default to 29 if not set
+  console.log("Current index from storage:", currentIndex);
 });
-
-// Function to process an array
-function processArray(index) {
-  if (index < excelData.length) {
-    // Assuming you have a logic to open a new tab or navigate to the URL
-    openTabOrNavigate(); // Replace this with your actual function to open/navigate to the tab
-  } else {
-    console.log("All arrays processed");
-    // End process or perform any final steps
-  }
-}
 
 // This part of the script monitors any navigation to certain URLS **
 // As shown in the declaration for "targetURLS = [...]" **
@@ -52,18 +42,16 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       return; // If already injected, exit early
     }
     // Stored and parsed excel data will be fetched
-    chrome.storage.local.get("excelData", function (data) {
-      // Error check
+    chrome.storage.local.get(["excelData", "currentIndex"], function (data) {
       if (chrome.runtime.lastError) {
-        console.error("Error retreiving the data:", chrome.runtime.lastError);
+        console.error("Error retrieving the data:", chrome.runtime.lastError);
         return;
       }
-      // Declaration for extracted excelData
-      const excelData = data.excelData;
 
-      // Injecting a Script into a Tab:
+      const excelData = data.excelData;
+      currentIndex = data.currentIndex || currentIndex; // Update from storage
+
       chrome.scripting.executeScript(
-        // Parameters and its given data
         {
           target: { tabId: tabId },
           files: ["newTabScript.js"],
@@ -127,15 +115,20 @@ function sendStartNextProposalMessage() {
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "closeTab") {
-    // Close the current tab
-    chrome.tabs.remove(sender.tab.id, function () {
-      console.log("Tab closed");
-      currentIndex++; // Increment for the next item
-      chrome.storage.local.set({ currentIndex: currentIndex });
-
-      // Now send the message to start the next proposal
-      sendStartNextProposalMessage();
-      console.log("CURRENT INDEX (BG):", currentIndex);
+    // Increment currentIndex only when the tab is closed
+    currentIndex++;
+    // Save the new currentIndex immediately
+    chrome.storage.local.set({ currentIndex: currentIndex }, function () {
+      if (chrome.runtime.lastError) {
+        console.error("Error setting currentIndex:", chrome.runtime.lastError);
+      } else {
+        console.log("Index saved to storage:", currentIndex);
+        // After saving, send a message to start next proposal
+        sendStartNextProposalMessage();
+      }
     });
+
+    // Close the tab as before
+    chrome.tabs.remove(sender.tab.id);
   }
 });

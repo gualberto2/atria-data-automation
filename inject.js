@@ -20,12 +20,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       return;
     }
-    const injectionResult = startProposal();
-    if (injectionResult) {
-      sendResponse({ status: "success", data: excelDataFromStorage });
-    } else {
-      sendResponse({ status: "error" });
-    }
+    startProposal(message.currentIndex); // Use the provided currentIndex
+    sendResponse({ status: "success", data: excelDataFromStorage });
   }
 });
 
