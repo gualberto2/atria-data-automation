@@ -1087,6 +1087,52 @@ function findRowAndClickRadioButton(nameOnPortfolio) {
   });
 }
 
+function rebalanceFrequencyAdd() {
+  // Query all buttons and convert NodeList to Array
+  let buttons = Array.from(document.querySelectorAll("button"));
+
+  // Find the "Add" button that is within the "Account Settings" section
+  let addButton = buttons.find(
+    (button) =>
+      button.textContent.includes("Add") &&
+      button.closest("h2")?.textContent.includes("Account Settings")
+  );
+
+  if (addButton) {
+    console.log("Add button found in Account Settings:", addButton);
+
+    // Click the found button
+    addButton.click();
+    console.log("Clicked 'Add' in Account Settings");
+
+    setTimeout(() => {
+      console.log("setting up observer for rebalance");
+      rebalanceFreqObs();
+    }, 3000);
+  }
+
+  function clickSaveButton() {
+    let saveButton = Array.from(document.querySelectorAll("button")).find(
+      (button) => button.textContent.includes("Save")
+    );
+
+    if (saveButton) {
+      console.log("Save button found:", saveButton);
+
+      saveButton.click();
+      console.log("Clicked 'Save'");
+      setTimeout(() => {
+        saveContinue();
+        setTimeout(() => {
+          clickFeeScheduleDropdownAndSelectOption();
+        }, 11000);
+      }, 5000);
+    } else {
+      console.log("Save button not found");
+    }
+  }
+}
+
 function clickSelectProductButton() {
   // Query for the button based on class name and content
   const buttons = Array.from(document.querySelectorAll("button"));
@@ -1094,18 +1140,25 @@ function clickSelectProductButton() {
     return button.textContent.includes("Select product");
   });
 
-  // Check if the button exists and is not disabled
   if (selectProductButton && !selectProductButton.disabled) {
+    // Check if the button exists and is not disabled
     selectProductButton.click();
     console.log('Clicked the "Select product" button.');
     setTimeout(() => {
       saveContinue();
-      setTimeout(() => {
-        saveContinue();
+      if (nameOnPortfolio === "6.18 UMA") {
         setTimeout(() => {
-          clickFeeScheduleDropdownAndSelectOption();
-        }, 11000);
-      }, 5000);
+          rebalanceFrequencyAdd();
+          console.log("referenceting");
+        }, 7000);
+      } else {
+        setTimeout(() => {
+          saveContinue();
+          setTimeout(() => {
+            clickFeeScheduleDropdownAndSelectOption();
+          }, 11000);
+        }, 5000);
+      }
     }, 3000);
   } else {
     console.log("Button not found or it is disabled.");
