@@ -2,6 +2,17 @@
 // This is step 3 - after proposal button is clicked on the my.advisor page
 
 const injectedTabs = new Set();
+let currentIndex = 33; // Starting index
+let excelData; // Array of data from Excel sheet
+
+// Save current index to storage
+chrome.storage.local.set({ currentIndex: currentIndex });
+
+// Load current index from storage
+chrome.storage.local.get("currentIndex", function (data) {
+  currentIndex = data.currentIndex || 29; // Default to 29 if not set
+  console.log("Current index from storage:", currentIndex);
+});
 
 // This part of the script monitors any navigation to certain URLS **
 // As shown in the declaration for "targetURLS = [...]" **
@@ -31,18 +42,16 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
       return; // If already injected, exit early
     }
     // Stored and parsed excel data will be fetched
-    chrome.storage.local.get("excelData", function (data) {
-      // Error check
+    chrome.storage.local.get(["excelData", "currentIndex"], function (data) {
       if (chrome.runtime.lastError) {
-        console.error("Error retreiving the data:", chrome.runtime.lastError);
+        console.error("Error retrieving the data:", chrome.runtime.lastError);
         return;
       }
-      // Declaration for extracted excelData
-      const excelData = data.excelData;
 
-      // Injecting a Script into a Tab:
+      const excelData = data.excelData;
+      currentIndex = data.currentIndex || currentIndex; // Update from storage
+
       chrome.scripting.executeScript(
-        // Parameters and its given data
         {
           target: { tabId: tabId },
           files: ["newTabScript.js"],
@@ -66,7 +75,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
               console.log("Sending automateData message to tab");
               chrome.tabs.sendMessage(tabId, {
                 action: "automateData",
-                data: excelData, // Passing the excelData here to newTabScript.js
+                data: excelData, // The entire data array
+                currentIndex: currentIndex, // Current index
               });
             }, 2000); // A 2 second delay
           }
@@ -76,33 +86,49 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   }
 });
 
-// This extension listens for messages from other scripts to automate certain tasks, like populating fields in the active tab.
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // When a message is received, the script checks if the action property of the message
-  // is "populateFieldsFromNewTabScript". If it is, the nested code block is executed.
-  if (message.action === "populateFieldsFromNewTabScript") {
-    // Querying for the Active Tab:
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      // Extracting the Active Tab:
-      const activeTab = tabs[0];
-
-      // Sending a Message to the Active Tab:
-      chrome.tabs.sendMessage(
-        activeTab.id,
-        {
-          action: "populateFields",
-          data: message.data,
-          mapping: message.mapping,
-        },
-        (response) => {
-          sendResponse(response);
-        }
-      );
-    });
-    return true; // This is needed for async response
-  }
-});
-
 chrome.tabs.onRemoved.addListener(function (tabId) {
   injectedTabs.delete(tabId);
+});
+
+// background.js
+function sendStartNextProposalMessage() {
+  // Add a timeout to wait before checking for the target tab
+  setTimeout(function () {
+    chrome.tabs.query(
+      { url: "https://my.advisorlogin.com/*" },
+      function (tabs) {
+        if (tabs.length > 0) {
+          const targetTabId = tabs[0].id;
+          chrome.tabs.sendMessage(targetTabId, {
+            action: "startNextProposal",
+            currentIndex: currentIndex,
+          });
+        } else {
+          console.error("Target tab not found after waiting.");
+          // Handle the case where the target tab is still not found
+          // Optionally, you can open the tab here if it's critical for the next step
+        }
+      }
+    );
+  }, 3000); // Wait for 3000 milliseconds (3 seconds) before checking
+}
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.action === "closeTab") {
+    // Increment currentIndex only when the tab is closed
+    currentIndex++;
+    // Save the new currentIndex immediately
+    chrome.storage.local.set({ currentIndex: currentIndex }, function () {
+      if (chrome.runtime.lastError) {
+        console.error("Error setting currentIndex:", chrome.runtime.lastError);
+      } else {
+        console.log("Index saved to storage:", currentIndex);
+        // After saving, send a message to start next proposal
+        sendStartNextProposalMessage();
+      }
+    });
+
+    // Close the tab as before
+    chrome.tabs.remove(sender.tab.id);
+  }
 });

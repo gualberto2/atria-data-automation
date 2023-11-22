@@ -20,29 +20,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       return;
     }
-    const injectionResult = startProposal();
-    if (injectionResult) {
-      sendResponse({ status: "success", data: excelDataFromStorage });
-    } else {
-      sendResponse({ status: "error" });
-    }
+    startProposal(message.currentIndex); // Use the provided currentIndex
+    sendResponse({ status: "success", data: excelDataFromStorage });
   }
 });
 
-// The first step in injection process
-function startProposal() {
-  // Declaration for the start proposal button on my.advisor portal (id for button is static)
-  const startProp = document.getElementById("submit_create_nextgen_proposal");
+function startProposal(index) {
+  if (!excelDataFromStorage || index >= excelDataFromStorage.length) {
+    console.error("Invalid index or excelDataFromStorage not loaded");
+    return false;
+  }
 
-  // if start prop exists
+  const startProp = document.getElementById("submit_create_nextgen_proposal");
+  const currentItem = excelDataFromStorage[index];
+
   if (startProp) {
-    // Clicks the startProp button
     startProp.click();
-    // return true - needed for async response
+
+    // Send a message to the background script
+    chrome.runtime.sendMessage({
+      action: "sendMessageToActiveTab",
+      currentItem: currentItem,
+    });
+
     return true;
   }
-  // No else statement, if startProp is not true (button does not exist)
-  // then it will always return false.
-  // Possible that id changed if this is the case.
   return false;
 }
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "startNextProposal") {
+    startProposal(message.currentIndex); // Use the received currentIndex
+  }
+});

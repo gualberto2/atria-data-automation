@@ -890,3 +890,128 @@ function setInputValueForNameFilterWhenModalAppears(inputValue) {
     console.log("Waiting for the modal to appear...");
   }
 }
+
+
+
+
+function APM(nameOnPortfolio) {
+  function setInputValueForNameFilterWhenModalAppears(nameOnPortfolio) {
+    const trySetInputValue = () => {
+      // Adjust the selector based on the APM modal's structure
+      const input = document.querySelector(
+        `.MuiDrawer-root input[placeholder="Filter by name"]`
+      );
+
+      if (input) {
+        input.focus();
+        input.value = nameOnPortfolio;
+        ["change", "input"].forEach((event) => {
+          input.dispatchEvent(new Event(event, { bubbles: true }));
+        });
+
+        console.log(`Set input value to "${nameOnPortfolio}"`);
+
+        observeTableAndFindRow(nameOnPortfolio);
+
+        return true;
+      }
+      return false;
+    };
+
+    // Similar observer setup as in FSP
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length > 0) {
+          const modalExists = Array.from(mutation.addedNodes).some(
+            (node) => node.matches && node.matches(".MuiDrawer-root")
+          );
+          if (modalExists && trySetInputValue()) {
+            observer.disconnect();
+            break;
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    if (!trySetInputValue()) {
+      console.log("Waiting for the modal to appear...");
+    }
+  }
+  function observeTableAndFindRow(nameOnPortfolio) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach((node) => {
+            // Check if the added node is a table row
+            if (node.role === "row") {
+              // Find the span containing the portfolio name
+              const spans = node.querySelectorAll("span");
+              spans.forEach((span) => {
+                if (span.textContent.trim() === nameOnPortfolio) {
+                  console.log(
+                    "Found row with portfolio name:",
+                    nameOnPortfolio
+                  );
+                  // Find and click the radio button
+                  const radioButton = node.querySelector(
+                    'button[role="radio"]'
+                  );
+                  if (radioButton) {
+                    radioButton.click();
+                    console.log(
+                      "Clicked the radio button for",
+                      nameOnPortfolio
+                    );
+                    setTimeout(() => {
+                      clickSelectProductButton();
+                    }, 5000);
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+
+    // Start observing the body for added elements
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    console.log("Observer has been set up. Waiting for the row to appear...");
+  }
+
+  function clickSelectProductButton() {
+    // Query for the button based on class name and content
+    const buttons = Array.from(document.querySelectorAll("button"));
+    const selectProductButton = buttons.find((button) => {
+      return button.textContent.includes("Select product");
+    });
+
+    // Check if the button exists and is not disabled
+    if (selectProductButton && !selectProductButton.disabled) {
+      selectProductButton.click();
+      console.log('Clicked the "Select product" button.');
+      setTimeout(() => {
+        saveContinue();
+        setTimeout(() => {
+          saveContinue();
+          setTimeout(() => {
+            clickFeeScheduleDropdownAndSelectOption();
+          }, 11000);
+        }, 5000);
+      }, 3000);
+    } else {
+      console.log("Button not found or it is disabled.");
+    }
+  }
+
+  setInputValueForNameFilterWhenModalAppears(nameOnPortfolio);
+}
