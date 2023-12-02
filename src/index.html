@@ -7,24 +7,39 @@
     <title>Atria Wealth</title>
   </head>
   <body>
-    <section>
-      <!--Sign up form for users-->
-      <div id="sign-in-container">
-        <h2>Sign In</h2>
-        <form id="sign-in-form">
-          <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" required></input>
-          </div>
-          <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" required></input>
-          </div>
-          <button type="submit">Sign In</button>
-        </form>
-      </div>
-    </section>
-    <section>
+    <!-- Sign-in Form -->
+    <div id="userSignInSection">
+      <form id="formUserSignIn">
+        <div>
+          <label for="inputEmailSignIn">Email:</label>
+          <input type="email" id="inputEmailSignIn" required />
+        </div>
+        <div>
+          <label for="inputPasswordSignIn">Password:</label>
+          <input type="password" id="inputPasswordSignIn" required />
+        </div>
+        <button type="submit">Sign In</button>
+      </form>
+      <button id="btnShowSignUpForm">Go to Sign Up</button>
+    </div>
+
+    <!-- Sign-up Form -->
+    <div id="userSignUpSection" style="display: none">
+      <form id="formUserSignUp">
+        <div>
+          <label for="inputEmailSignUp">Email:</label>
+          <input type="email" id="inputEmailSignUp" required />
+        </div>
+        <div>
+          <label for="inputPasswordSignUp">Password:</label>
+          <input type="password" id="inputPasswordSignUp" required />
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <button id="btnShowSignInForm">Go to Sign In</button>
+    </div>
+    <!-- Main Content -->
+    <section id="main-content" style="display: none">
       <div>
         <div>
           <h1>Ocomni Client Automation</h1>

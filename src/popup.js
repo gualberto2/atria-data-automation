@@ -1,4 +1,21 @@
 // POPUP.JS **
+
+// Below is form sign in and sign up logic
+
+const signInSection = document.getElementById("userSignInSection");
+const signUpSection = document.getElementById("userSignUpSection");
+const btnShowSignUpForm = document.getElementById("btnShowSignUpForm");
+const btnShowSignInForm = document.getElementById("btnShowSignInForm");
+
+btnShowSignUpForm.addEventListener("click", () => {
+  signInSection.style.display = "none";
+  signUpSection.style.display = "block";
+});
+
+btnShowSignInForm.addEventListener("click", () => {
+  signUpSection.style.display = "none";
+  signInSection.style.display = "block";
+});
 // This is ran/opened at my.adivsor portal **
 // This is step 1: Excel sheet is processed here and the "Start Button" sends **
 // messages to the other scripts to run actions (functions) **
