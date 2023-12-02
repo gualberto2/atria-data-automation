@@ -84,15 +84,14 @@ function setupMutationObserverForModal(data, index) {
           console.log("MODAL_DETECTED");
           processExcelData(data, index);
 
-          // Disconnect the current observer since we found the modal
+          // Disconnect the observer immediately after processing the data
           observer.disconnect();
-
-          // Setup another observer to detect the removal of the modal
-          // setupObserverForModalRemoval();
+          return; // Exit the loop and function after processing
         }
       }
     }
   };
+
   // Once modal is found:
   // Step three-two
   // Give aria labels definitions
@@ -289,7 +288,6 @@ function setupMutationObserverForModal(data, index) {
       }
     }
   }
-
   const observer = new MutationObserver(callback);
   observer.observe(targetNode, config);
 }
@@ -1087,53 +1085,16 @@ function findRowAndClickRadioButton(nameOnPortfolio) {
   });
 }
 
-function rebalanceFrequencyAdd() {
-  // Query all buttons and convert NodeList to Array
-  let buttons = Array.from(document.querySelectorAll("button"));
-
-  // Find the "Add" button that is within the "Account Settings" section
-  let addButton = buttons.find(
-    (button) =>
-      button.textContent.includes("Add") &&
-      button.closest("h2")?.textContent.includes("Account Settings")
-  );
-
-  if (addButton) {
-    console.log("Add button found in Account Settings:", addButton);
-
-    // Click the found button
-    addButton.click();
-    console.log("Clicked 'Add' in Account Settings");
-
-    setTimeout(() => {
-      console.log("setting up observer for rebalance");
-      rebalanceFreqObs();
-    }, 3000);
-  }
-
-  function clickSaveButton() {
-    let saveButton = Array.from(document.querySelectorAll("button")).find(
-      (button) => button.textContent.includes("Save")
-    );
-
-    if (saveButton) {
-      console.log("Save button found:", saveButton);
-
-      saveButton.click();
-      console.log("Clicked 'Save'");
-      setTimeout(() => {
-        saveContinue();
-        setTimeout(() => {
-          clickFeeScheduleDropdownAndSelectOption();
-        }, 11000);
-      }, 5000);
-    } else {
-      console.log("Save button not found");
-    }
-  }
-}
-
 function clickSelectProductButton() {
+  function clickAddButtonByText() {
+    var buttons = document.querySelectorAll("button");
+    buttons.forEach(function (button) {
+      if (button.textContent.trim() === "Add") {
+        button.click();
+      }
+    });
+  }
+
   // Query for the button based on class name and content
   const buttons = Array.from(document.querySelectorAll("button"));
   const selectProductButton = buttons.find((button) => {
@@ -1146,12 +1107,13 @@ function clickSelectProductButton() {
     console.log('Clicked the "Select product" button.');
     setTimeout(() => {
       saveContinue();
-      if (nameOnPortfolio === "6.18 UMA") {
+      if (globalProgram === "UMA") {
         setTimeout(() => {
-          rebalanceFrequencyAdd();
+          clickAddButtonByText();
           console.log("referenceting");
         }, 7000);
-      } else {
+      }
+      if (globalProgram !== "UMA") {
         setTimeout(() => {
           saveContinue();
           setTimeout(() => {
@@ -1162,6 +1124,27 @@ function clickSelectProductButton() {
     }, 3000);
   } else {
     console.log("Button not found or it is disabled.");
+  }
+}
+
+function rebalanceSave() {
+  let saveButton = Array.from(document.querySelectorAll("button")).find(
+    (button) => button.textContent.includes("Save")
+  );
+
+  if (saveButton) {
+    console.log("Save button found:", saveButton);
+
+    saveButton.click();
+    console.log("Clicked 'Save'");
+    setTimeout(() => {
+      saveContinue();
+      setTimeout(() => {
+        clickFeeScheduleDropdownAndSelectOption();
+      }, 11000);
+    }, 5000);
+  } else {
+    console.log("Save button not found");
   }
 }
 
