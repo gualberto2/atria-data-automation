@@ -2,7 +2,7 @@
 // This is step 3 - after proposal button is clicked on the my.advisor page
 
 const injectedTabs = new Set();
-let currentIndex = 33; // Starting index
+let currentIndex = 29; // Starting index
 let excelData; // Array of data from Excel sheet
 
 // Save current index to storage
