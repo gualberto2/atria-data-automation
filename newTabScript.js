@@ -3,6 +3,8 @@
 
 // Utility functions defined here below:
 
+// make note for users to keep running and open in new window  it opens the new tab and may interfere woth someomes work flow
+
 // Step one, get data... data obtained, start automation
 // Listener to act upon receiving messages from the Chrome extension.
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -42,18 +44,25 @@ function clickSpan() {
 
   // Loop through each span and click if it matches the desired text.
   spans.forEach((span) => {
-    if (span.textContent.includes("Create a new household")) {
-      // Create a new mouse event
-      let event = new MouseEvent("click", {
-        view: window,
-        bubbles: true,
-        cancelable: true,
+    try {
+      if (span.textContent.includes("Create a new household")) {
+        // Create a new mouse event
+        let event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        // Dispatch the event on the target element...
+        span.dispatchEvent(event);
+        success = true; // Return whether the desired span was clicked or not.
+        // _DEV USE
+        console.log("Creating new household button...");
+      }
+    } catch (error) {
+      chrome.runtime.sendMessage({
+        type: "logError",
+        error: `Error at step: Click "Create new household +"` + error.message,
       });
-      // Dispatch the event on the target element...
-      span.dispatchEvent(event);
-      success = true; // Return whether the desired span was clicked or not.
-      // _DEV USE
-      console.log("Creating new household button...");
     }
   });
   return success; // Return the status
@@ -82,6 +91,14 @@ let jointFirst = "";
 let jointLast = "";
 // Find modal
 
+try {
+  // Some code that might fail
+} catch (error) {
+  chrome.runtime.sendMessage({
+    type: "logError",
+    error: "Error in function XYZ: " + error.message,
+  });
+}
 function startFirstModalPopulation(data, index) {
   const observerConfig = { attributes: false, childList: true, subtree: true };
 
