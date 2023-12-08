@@ -4,11 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="index.css" />
-    <title>Atria Wealth</title>
+    <title>Ocomni Automation</title>
   <script defer src="popup.js"></script></head>
   <body>
+    <!--Welcome section-->
+    <div id="welcomeSection" style="display: none">
+      Welcome, <span id="username"></span>
+    </div>
+    <!--Sign in error section-->
+    <div id="signInError" style="color: red; display: none">
+      <p>Invalid email/password</p>
+    </div>
+    <div id="signUpError" style="color: red; display: none">
+      <p>
+        This email is already in use. Please sign in or use a different email.
+      </p>
+    </div>
     <!-- Sign-in Form -->
     <div id="userSignInSection">
+      <h2>Sign In</h2>
       <form id="formUserSignIn">
         <div>
           <label for="inputEmailSignIn">Email:</label>
@@ -25,6 +39,7 @@
 
     <!-- Sign-up Form -->
     <div id="userSignUpSection" style="display: none">
+      <h2>Sign Up</h2>
       <form id="formUserSignUp">
         <div>
           <label for="inputEmailSignUp">Email:</label>
