@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Atria Wealth",
+  "description": "Atria Wealth",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "host_permissions": ["https://my.advisorlogin.com/*"],
+  "permissions": ["activeTab", "storage", "tabs", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["https://my.advisorlogin.com/*"],
+      "js": ["inject.js", "newTabScript.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
+  },
+  "sandbox": {
+    "pages": ["sandbox.html"]
+  },
+  "background": {
+    "service_worker": "service_worker.js"
+  }
+}

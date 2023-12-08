@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Ocomni Automation</title>
+  <script defer src="popup.js"></script></head>
+  <body>
+    <!--Welcome section-->
+    <div id="welcomeSection" style="display: none">
+      Welcome, <span id="username"></span>
+    </div>
+    <!--Sign in error section-->
+    <div id="signInError" style="color: red; display: none">
+      <p>Invalid email/password</p>
+    </div>
+    <div id="signUpError" style="color: red; display: none">
+      <p>
+        This email is already in use. Please sign in or use a different email.
+      </p>
+    </div>
+    <!-- Sign-in Form -->
+    <div id="userSignInSection">
+      <h2>Sign In</h2>
+      <form id="formUserSignIn">
+        <div>
+          <label for="inputEmailSignIn">Email:</label>
+          <input type="email" id="inputEmailSignIn" required />
+        </div>
+        <div>
+          <label for="inputPasswordSignIn">Password:</label>
+          <input type="password" id="inputPasswordSignIn" required />
+        </div>
+        <button type="submit">Sign In</button>
+      </form>
+      <button id="btnShowSignUpForm">Go to Sign Up</button>
+    </div>
+
+    <!-- Sign-up Form -->
+    <div id="userSignUpSection" style="display: none">
+      <h2>Sign Up</h2>
+      <form id="formUserSignUp">
+        <div>
+          <label for="inputEmailSignUp">Email:</label>
+          <input type="email" id="inputEmailSignUp" required />
+        </div>
+        <div>
+          <label for="inputPasswordSignUp">Password:</label>
+          <input type="password" id="inputPasswordSignUp" required />
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <button id="btnShowSignInForm">Go to Sign In</button>
+    </div>
+    <!-- Main Content -->
+    <section id="main-content" style="display: none">
+      <div>
+        <div>
+          <h1>Ocomni Client Automation</h1>
+          <!-- <h2>Auto Fill Script</h2> -->
+        </div>
+        <div>
+          <p>Instructions</p>
+          <p>Upload an approved Formatted Advisor excel sheet</p>
+          <p>Run the script</p>
+          <p>Read the post-script log for errors</p>
+          <p>Report errors, make corrections and move onto the next Advisor</p>
+        </div>
+
+        <p>
+          Submit error reports
+          <span> here </span>
+          .
+        </p>
+        <p>
+          Have a question? Visit
+          <span> here </span>
+          .
+        </p>
+
+        <div>
+          <div>
+            <input type="file" id="fileinput" accept=".xlsx, .csv" />
+          </div>
+          <div>
+            <div>
+              <button id="start">Start population</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="./xlsx.full.min.js"></script>
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>
