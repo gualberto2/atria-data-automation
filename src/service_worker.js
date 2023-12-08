@@ -4,6 +4,14 @@
 const injectedTabs = new Set();
 let currentIndex = 29; // Starting index
 let excelData; // Array of data from Excel sheet
+let errorLogs = [];
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "logError") {
+    errorLogs.push({ tabId: sender.tab.id, error: message.error });
+    console.log("Error logged:", message.error);
+  }
+});
 
 // Save current index to storage
 chrome.storage.local.set({ currentIndex: currentIndex });
@@ -117,6 +125,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "closeTab") {
     // Increment currentIndex only when the tab is closed
     currentIndex++;
+    checkIfProcessingComplete();
     // Save the new currentIndex immediately
     chrome.storage.local.set({ currentIndex: currentIndex }, function () {
       if (chrome.runtime.lastError) {
@@ -132,3 +141,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     chrome.tabs.remove(sender.tab.id);
   }
 });
+
+function openErrorLogTab() {
+  const errorData = JSON.stringify(errorLogs, null, 2);
+  chrome.tabs.create({
+    url: "data:text/plain;charset=utf-8," + encodeURIComponent(errorData),
+  });
+}
+
+function checkIfProcessingComplete(currentIndex, totalIndexes) {
+  if (currentIndex >= totalIndexes) {
+    openErrorLogTab();
+  }
+}
